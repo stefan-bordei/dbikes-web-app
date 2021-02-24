@@ -1,14 +1,13 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
 from  sqlalchemy.ext.declarative import declarative_base
-import sqlalchemy
 from sqlalchemy.orm import relationship, sessionmaker
 import requests
-import mysql.connector
 import sqlalchemy
-import json
-from IPython.display import JSON
 from datetime import datetime
 from weathertester import WeatherTime, Valuechecker, Weatheradd, Staticadd, Dynaadd
+import mysql.connector
+
+
 
 import time
 
@@ -114,13 +113,20 @@ for i in rjson:
 ## Define a start time (time of first run) this will be used for the timer
 starttime=time.time()
 
+elog= open("errorlog.txt","x")
 ## Weekcount for static table and half hour for weather table
 weekcount=0
 halfhour=0
 while True:
     # Reintilise the dublin bikes request and json (the json file would remain the same otherwise)
-    r = requests.get(stations, params={"apiKey": apikey, "contract": name})
-    rjson = r.json()
+    try:
+        r = requests.get(stations, params={"apiKey": apikey, "contract": name})
+        rjson = r.json()
+    except:
+        e= open("errorlog.txt","w")
+        e.write("Dublin Bikes Connection Error:"+ (time.time() - starttime))
+        e.close()
+        time.sleep(500 - ((time.time() - starttime) % 500))
     for i in rjson:
         # Update the rows with the new data
         updater = session.query(Update).get(i["number"])
@@ -141,6 +147,14 @@ while True:
         weekcount += 5
         halfhour += 1
     if weekcount >= 10080*7:
+        try:
+            r = requests.get(stations, params={"apiKey": apikey, "contract": name})
+            rjson = r.json()
+        except:
+            e = open("errorlog.txt", "w")
+            e.write("Dublin Bikes Connection Error: " + (time.time() - starttime))
+            e.close()
+            time.sleep(500 - ((time.time() - starttime) % 500))
         if (session.query(Station).filter_by(id=i["number"]).first()) == None:
             newstat=Staticadd(i,Station())
             session.add(newstat)
@@ -155,11 +169,18 @@ while True:
         session.commit()
         weekcount=0
     if halfhour >= 6:
+        try:
+            w = requests.get(weatherfile)
+            wjson = w.json()
+        except:
+            e = open("errorlog.txt", "w")
+            e.write("Dublin Bikes Connection Error:" + (time.time() - starttime))
+            e.close()
+            time.sleep(500 - ((time.time() - starttime) % 500))
         w = requests.get(weatherfile)
         wjson = w.json()
         for i in wjson:
             if (session.query(Weather).filter_by(id=WeatherTime(i["date"],i["reportTime"])).first()) == None:
-                print("its happening 2 electric boogaloo")
                 weatherup = Weatheradd(i,Weather())
                 session.add(weatherup)
                 session.commit()

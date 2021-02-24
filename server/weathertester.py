@@ -1,5 +1,4 @@
 import requests
-import json
 from datetime import datetime
 weather= "https://prodapi.metweb.ie/observations/phoenix-park/today"
 

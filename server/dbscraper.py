@@ -8,7 +8,6 @@ from weathertester import WeatherTime, Valuechecker, Weatheradd, Staticadd, Dyna
 import mysql.connector
 
 
-
 import time
 
 Base= declarative_base()
@@ -110,14 +109,14 @@ for i in rjson:
     session.add(row_h)
     session.commit()
 
-## Define a start time (time of first run) this will be used for the timer
-starttime=time.time()
 
 elog= open("errorlog.txt","x")
 ## Weekcount for static table and half hour for weather table
 weekcount=0
 halfhour=0
 while True:
+    ## Define a start time (time of first run) this will be used for the timer
+    starttime = time.time()
     # Reintilise the dublin bikes request and json (the json file would remain the same otherwise)
     try:
         r = requests.get(stations, params={"apiKey": apikey, "contract": name})
@@ -181,6 +180,7 @@ while True:
         wjson = w.json()
         for i in wjson:
             if (session.query(Weather).filter_by(id=WeatherTime(i["date"],i["reportTime"])).first()) == None:
+                print("its happening 2 electric boogaloo")
                 weatherup = Weatheradd(i,Weather())
                 session.add(weatherup)
                 session.commit()

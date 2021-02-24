@@ -21,8 +21,13 @@ APIKEY = os.environ.get('JCD_API_KEY')
 NAME = "Dublin"
 STATION_URI = "https://api.jcdecaux.com/vls/v1/stations"
 
+# connection info open weather
+OW_APIKEY = os.environ.get('OW_API_KEY')
+OW_NAME = "Dublin,IE"
+OW_URI = "http://api.openweathermap.org/data/2.5/weather"
+
 def get_data(uri=None, key=None, name=None):
-    return requests.get(uri, params={"apiKey" : key, "contract" : name}).json()
+    return requests.get(uri, params={"apiKey" : key, "contract" : name, "q" : name, "appid" : key}).json()
 
 def map_static_data(obj):
     """
@@ -51,6 +56,21 @@ def map_dynamic_data(obj):
             'LastUpdate' : datetime.datetime.fromtimestamp(int(obj['last_update'] / 1e3)) }
 
 
+def map_weather_data(obj):        
+    """
+        Function to return a dictionary mapped from obj.
+        Used for the weather table.
+    """
+    return { 'Id' : obj['id'],
+             'Description' : obj['weather'][0]['description'],
+             'Temperature' : obj['main']['temp'],
+             'Temp_min' : obj['main']['temp_min'],
+             'Temp_max' : obj['main']['temp_max'],
+             'Humidity' : obj['main']['humidity'],
+             'Wind_speed' : obj['visibility'], 
+             'Visibility' : obj['wind']['speed'], 
+             'LastUpdate' : datetime.datetime.now()}
+
 
 # connection info DB
 DB_NAME = os.environ.get('DB_DBIKES_USER')
@@ -73,6 +93,34 @@ class StaticStations(Base):
     PosLng = Column(Float)
     BikeStands = Column(Integer)
     LastUpdate = Column(DateTime)
+
+    def update_table(self, obj):
+        """
+            Checks if any of the data changed and updates the cell if True.
+        """
+        changed = False
+        for elem in obj:
+            if self.Number != elem['number']:
+                self.Number = elem['number']
+                changed = True
+            if self.Name != elem['name']:
+                self.Name = elem['name']
+                changed = True
+            if self.Address != elem['address']:
+                self.Address = elem['address']
+                changed = True
+            if self.PosLat != elem['position']['lat']:
+                self.PosLat = elem['position']['lat']
+                changed = True
+            if self.PosLng != elem['position']['lng']:
+                self.PosLng = elem['position']['lng']
+                changed = True
+            if self.BikeStands != elem['bike_stands']:
+                self.BikeStands = elem['bike_stands']
+                changed = True
+
+            if changed:
+                session.add(self)
 
     def __repr__(self):
         """
@@ -106,7 +154,31 @@ class DynamicStations(Base):
                 % (self.Id, self.Number, self.Status, self.AvailableBikeStands, self.BikeStands, self.LastUpdate)
         
 
+class WeatherData(Base):      
+    """
+        Class constructor for the WeatherData table.
+    """
+        
+    __tablename__ = "weather_data"
+    Id = Column(Float)
+    Description = Column(String(128))
+    Temperature = Column(String(128))
+    Temp_min = Column(Float)
+    Temp_max = Column(Float)
+    Humidity = Column(Integer)
+    Wind_speed = Column(Float)
+    Visibility = Column(Float)
+    LastUpdate = Column(DateTime, primary_key=True) 
 
+    def __repr__(self):
+        """
+            Prints the values instead of the memory pointer.
+        """
+        
+        return "<Node(Id='%s', Description='%s', Temperature='%s', Temp_min='%s', Temp_max='%s', BikeSHumidity='%s', Wind_speed='%s', LastUpdate='%s')>" \
+                % (self.Id, self.Description, self.Temperature, self.Temp_min, self.Temp_max, self.BikeSHumidity, self.Wind_speed, self.LastUpdate)
+
+        
     
 def main():    
     # create engine and base
@@ -115,13 +187,14 @@ def main():
     # create tables if they don't exist.
     StaticStations.__table__.create(bind=engine, checkfirst=True)
     DynamicStations.__table__.create(bind=engine, checkfirst=True)
+    WeatherData.__table__.create(bind=engine, checkfirst=True)
     
     # start a session 
     Session = sessionmaker(bind=engine)
     session = Session()
 
     
-    # store json data in 'bikes_json'.
+    # store json data in 'bikes_json' and 'weather_json'.
     bikes_json = get_data(STATION_URI, APIKEY, NAME)
 
 
@@ -146,12 +219,16 @@ def main():
         try:
             # collect data from jcdecaux api and insert it into the dynamic table.
             bikes_json = get_data(STATION_URI, APIKEY, NAME)
+            weather_json = get_data(OW_URI, OW_APIKEY, OW_NAME)
             dynamic_data = list(map(map_dynamic_data, bikes_json))
             logging.info(f"Insert {len(dynamic_data)} dynamic updates")
             if dynamic_data:
                 for data in dynamic_data:
                     session.add(DynamicStations(**data))
-                session.commit()
+            logging.info(f"Insert {len(dynamic_data)} dynamic updates")
+            if weather_json:
+                session.add(WeatherData(**map_weather_data(weather_json)))
+            session.commit()
             time.sleep(5*60)
 
         except requests.exceptions.HTTPError as e:

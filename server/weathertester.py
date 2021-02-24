@@ -10,36 +10,24 @@ wjson=w.json()
 
 
 def WeatherTime(date,time):
+    """ Takes the date and reportTime from a json object and returns a datetime object"""
     timenew = time + ":00"
     correctdate = date +" "+ timenew
     return datetime.strptime(correctdate, "%d-%m-%Y %H:%M:%S")
 
 
-
-"""
-def WeatherTime(date,time):
-    for i in wjson:
-        timenew = time+":00"
-        datelist = date.split("-")
-        correctdate=""
-        dashcount=0
-        for i in datelist:
-           if dashcount < 2:
-               correctdate +=i+"-"
-               dashcount += 1
-           else:
-               correctdate +=i
-        correctdate += " "+timenew
-        return correctdate
-"""
 def Valuechecker(value):
+    """Checks if the value is NA or a varient, used to avoid crashes"""
     badvalues = ["NA","N/A","-"]
     if value in badvalues:
         return None
     else:
         return value
 
+
+
 def Weatheradd(dict,table):
+    """Creates a Weather object from a dictionary"""
     orm= table
     orm.id = WeatherTime(dict["date"], dict["reportTime"])
     orm.name = dict["name"]
@@ -55,6 +43,7 @@ def Weatheradd(dict,table):
     return orm
 
 def Staticadd(dict,table):
+    """Creates a staticadd object (row for static table) from a dictionary"""
     station=table
     station.id = dict["number"]
     station.name = dict["name"]
@@ -67,6 +56,7 @@ def Staticadd(dict,table):
     return station
 
 def Dynaadd(dict,table,hist=0):
+    """Creates a Dynaad object (row for dynamic/update table) the hist variable idicates if this is for main or historical table"""
     if hist==0:
         update= table
         update.id = dict["number"]
@@ -74,7 +64,10 @@ def Dynaadd(dict,table,hist=0):
         update.bstands = dict["bike_stands"]
         update.abstands = dict["available_bike_stands"]
         update.abikes = dict["available_bikes"]
-        update.update = datetime.fromtimestamp(dict["last_update"] / 1000)
+        if dict["last_update"] == None:
+            update.update= None
+        else:
+            update.update = datetime.fromtimestamp(dict["last_update"] / 1000)
         return update
     else:
         history=table
@@ -83,7 +76,10 @@ def Dynaadd(dict,table,hist=0):
         history.bstands = dict["bike_stands"]
         history.abstands = dict["available_bike_stands"]
         history.abikes = dict["available_bikes"]
-        history.update = datetime.fromtimestamp(dict["last_update"] / 1000)
+        if dict["last_update"] == None:
+            history.update= None
+        else:
+            history.update = datetime.fromtimestamp(dict["last_update"] / 1000)
         return history
 
 

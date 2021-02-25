@@ -1,6 +1,10 @@
 import requests
 from datetime import datetime
-
+from  sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey
+from  sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
+import sqlalchemy
 
 weather= "https://prodapi.metweb.ie/observations/phoenix-park/today"
 
@@ -8,7 +12,66 @@ w= requests.get(weather)
 
 wjson=w.json()
 
+Base= declarative_base()
 
+
+class Station(Base):
+    # This defines the table stations which will be used for the static data
+    __tablename__="stations"
+
+    child = relationship("Update",uselist=False,back_populates="parent")
+    id=Column("number", Integer, primary_key=True)
+    name=Column("name", String(128))
+    address=Column("address", String(128))
+    bstands=Column("bike_stands", Integer)
+    plat=Column("pos_lat", Float)
+    plong=Column("pos_long", Float)
+    bank=Column("banking",String(120))
+    bonus=Column("bonus",String(120))
+
+class Update(Base):
+    #This defines the table availability which will be used for the dynamic data
+    __tablename__="availability"
+
+    parent = relationship("Station",back_populates="child")
+    id=Column("number", Integer,ForeignKey("stations.number"), primary_key=True,)
+    avail=Column("available", String(128))
+    bstands=Column("bstands", Integer)
+    abstands=Column("available_bstands", Integer)
+    abikes=Column("available_bikes", Integer)
+    update=Column("last_update", DateTime)
+
+class History(Base):
+    # This defines the history table, which will archive the availability data for future analysis
+    __tablename__="history"
+
+    id = Column("id",Integer,primary_key=True)
+    statnum = Column("number", Integer,)
+    avail = Column("available", String(128))
+    bstands = Column("bstands", Integer)
+    abstands = Column("available_bstands", Integer)
+    abikes = Column("available_bikes", Integer)
+    update = Column("last_update", DateTime)
+
+class Weather(Base):
+    # This defines the Weather table which is used for the weather
+    __tablename__="weather"
+
+    id= Column("datetime",DateTime,primary_key=True)
+    name=Column("name",String(120))
+    temp=Column("temperature",Integer)
+    desc=Column("description",String(120))
+    wspeed=Column("windspeed",Integer)
+    wGust=Column("windgust",Integer)
+    cwind=Column("cardwindir",String(120))
+    windir=Column("winddirect",Integer)
+    humid=Column("humidity",Integer)
+    rain=Column("rainfall",Float)
+    pressure=Column("pressure",Integer)
+
+
+engine = sqlalchemy.create_engine("mysql+mysqlconnector://admin:killthebrits@dbikes.cmf8vg83zpoy.eu-west-1.rds.amazonaws.com:3306/dbikes")
+Base.metadata.create_all(bind=engine)
 
 
 def WeatherTime(date,time):

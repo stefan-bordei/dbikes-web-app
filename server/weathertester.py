@@ -1,10 +1,13 @@
 import requests
 from datetime import datetime
+
+
 weather= "https://prodapi.metweb.ie/observations/phoenix-park/today"
 
 w= requests.get(weather)
 
 wjson=w.json()
+
 
 
 

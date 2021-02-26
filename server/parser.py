@@ -67,8 +67,8 @@ def map_weather_data(obj):
              'Temp_min' : obj['main']['temp_min'],
              'Temp_max' : obj['main']['temp_max'],
              'Humidity' : obj['main']['humidity'],
-             'Wind_speed' : obj['visibility'], 
-             'Visibility' : obj['wind']['speed'], 
+             'Visibility' : obj['visibility'], 
+             'Wind_speed' : obj['wind']['speed'], 
              'LastUpdate' : datetime.datetime.now()}
 
 

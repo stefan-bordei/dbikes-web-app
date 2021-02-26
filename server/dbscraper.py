@@ -54,6 +54,8 @@ for i in rjson:
     session.add(row_h)
     session.commit()
 session.close()
+elog= open("errorlog.txt","x")
+tlog= open("Actionlog.txt","x")
 print("Database created")
 
 

@@ -36,6 +36,7 @@ weekCount=0
 halfHour=0
 
 while True:
+    dupCount=0
     tLog.write("While loop began at: " + str(datetime.now()))
     ## Define a start time (time of first run) this will be used for the timer
     startTime = time.time()
@@ -71,7 +72,9 @@ while True:
             if i["number"] == j.statnum:
                 # if the last_update in null this or statement prevents a crash by short-circuiting the statement
                 if i["last_update"] == j.update or datetime.fromtimestamp(i["last_update"] / 1000) == j.update:
+                    dupCount+=1
                     break
+
                 else:
                     row_hist=Dynaadd(i,History(),1)
                     session.add(row_hist)
@@ -82,6 +85,7 @@ while True:
     diff = time.time() - stimer
     tLog.write("Update and history loop completed at: " + str(datetime.now()))
     timeLog.write("update and history time to complete: "+ str(diff))
+    timeLog.write("Duplicates found:" + str(dupCount))
     if weekCount >= 10080*7:
         try:
             r = requests.get(stations, params={"apiKey": apikey, "contract": name})

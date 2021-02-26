@@ -28,7 +28,7 @@ weatherfile= "https://prodapi.metweb.ie/observations/dublin/today"
 w= requests.get(weatherfile)
 wjson=w.json()
 
-
+timeLog=open("timelog.txt","x")
 eLog= open("errorlog.txt","w")
 tLog= open("Actionlog.txt","w")
 ## Weekcount for static table and half hour for weather table
@@ -36,6 +36,7 @@ weekCount=0
 halfHour=0
 
 while True:
+    tLog.write("While loop began at: " + str(datetime.now()))
     ## Define a start time (time of first run) this will be used for the timer
     startTime = time.time()
     # Reintilise the dublin bikes request and json (the json file would remain the same otherwise)
@@ -45,6 +46,7 @@ while True:
     except:
         eLog.write("Dublin Bikes Connection Error:"+ (time.time() - startTime))
         time.sleep(500 - ((time.time() - startTime) % 500))
+    stimer = time.time()
     for i in rjson:
         histCount=0
         # Update the rows with the new data
@@ -75,8 +77,11 @@ while True:
                     session.add(row_hist)
                     session.commit()
                     histCount+=1
-        weekCount += 5
-        halfHour += 1
+    weekCount += 5
+    halfHour += 1
+    diff = time.time() - stimer
+    tLog.write("Update and history loop completed at: " + str(datetime.now()))
+    timeLog.write("update and history time to complete: "+ str(diff))
     if weekCount >= 10080*7:
         try:
             r = requests.get(stations, params={"apiKey": apikey, "contract": name})
@@ -100,6 +105,8 @@ while True:
         session.commit()
         weekcount=0
     if halfHour >= 6:
+        tLog.write("Weather loop began at: " + str(datetime.now()))
+        wTimer= time.time()
         try:
             w = requests.get(weatherfile)
             wjson = w.json()
@@ -116,5 +123,8 @@ while True:
                 session.add(weatherUpdate)
                 session.commit()
         halfHour =0
+        diff=time.time() - wTimer
+        timeLog.write("Weather loop time to complete time to complete: " + str(diff))
+        tLog.write("Weather loop completed at: " + str(datetime.now()))
 
     time.sleep(500 - ((time.time() - startTime) % 500))

@@ -12,7 +12,6 @@ import time
 
 #Create the sql alchemy engine, bind the base metadata and initalise a Session
 engine = sqlalchemy.create_engine("mysql+mysqlconnector://admin:killthebrits@dbikes.cmf8vg83zpoy.eu-west-1.rds.amazonaws.com:3306/dbikes")
-connection = engine.connect()
 Session = sessionmaker(bind=engine)
 session= Session()
 
@@ -30,40 +29,40 @@ w= requests.get(weatherfile)
 wjson=w.json()
 
 
-elog= open("errorlog.txt","w")
-tlog= open("Actionlog.txt","w")
+eLog= open("errorlog.txt","w")
+tLog= open("Actionlog.txt","w")
 ## Weekcount for static table and half hour for weather table
-weekcount=0
-halfhour=0
+weekCount=0
+halfHour=0
 
 while True:
     ## Define a start time (time of first run) this will be used for the timer
-    starttime = time.time()
+    startTime = time.time()
     # Reintilise the dublin bikes request and json (the json file would remain the same otherwise)
     try:
         r = requests.get(stations, params={"apiKey": apikey, "contract": name})
         rjson = r.json()
     except:
-        elog.write("Dublin Bikes Connection Error:"+ (time.time() - starttime))
-        time.sleep(500 - ((time.time() - starttime) % 500))
+        eLog.write("Dublin Bikes Connection Error:"+ (time.time() - startTime))
+        time.sleep(500 - ((time.time() - startTime) % 500))
     for i in rjson:
-        histcount=0
+        histCount=0
         # Update the rows with the new data
-        updater = session.query(Update).get(i["number"])
-        updater.avail = i["status"]
-        updater.bstands = i["bike_stands"]
-        updater.abstands = i["available_bike_stands"]
-        updater.abikes = i["available_bikes"]
+        updaterHist = session.query(Update).get(i["number"])
+        updaterHist.avail = i["status"]
+        updaterHist.bikeStands = i["bike_stands"]
+        updaterHist.availBikeStands = i["available_bike_stands"]
+        updaterHist.availBikes = i["available_bikes"]
         # this if loop prevents a crash in the event of the last_update being blank
         if i["last_update"] == None:
-            updater.update= None
+            updaterHist.update= None
         else:
-            updater.update = datetime.fromtimestamp(i["last_update"] / 1000)
-        session.add(updater)
+            updaterHist.update = datetime.fromtimestamp(i["last_update"] / 1000)
+        session.add(updaterHist)
         session.commit()
 
         ## this gets the last 200 entries in the table , to check for duplicates
-        duplicates = session.query(History).order_by(History.id.desc()).limit(200)
+        duplicates = session.query(History).order_by(History.id.desc()).limit(240)
 
         #this filters for duplicates (if the stationnumber and the last update are the same the entry isnt added)
         for j in duplicates:
@@ -75,18 +74,18 @@ while True:
                     row_hist=Dynaadd(i,History(),1)
                     session.add(row_hist)
                     session.commit()
-                    histcount+=1
-        weekcount += 5
-        halfhour += 1
-    if weekcount >= 10080*7:
+                    histCount+=1
+        weekCount += 5
+        halfHour += 1
+    if weekCount >= 10080*7:
         try:
             r = requests.get(stations, params={"apiKey": apikey, "contract": name})
             rjson = r.json()
         except:
             e = open("errorlog.txt", "w")
-            e.write("Error in static update " + (time.time() - starttime))
+            e.write("Error in static update " + (time.time() - startTime))
             e.close()
-            time.sleep(500 - ((time.time() - starttime) % 500))
+            time.sleep(500 - ((time.time() - startTime) % 500))
         if (session.query(Station).filter_by(id=i["number"]).first()) == None:
             newstat=Staticadd(i,Station())
             session.add(newstat)
@@ -94,28 +93,28 @@ while True:
         stationup = session.query(Station).get(i["number"])
         stationup.name = i["name"]
         stationup.address = i["address"]
-        stationup.bstands = i["bike_stands"]
-        stationup.plat = i["position"]["lat"]
-        stationup.plong = i["position"]["lng"]
+        stationup.bikeStands = i["bike_stands"]
+        stationup.posLat = i["position"]["lat"]
+        stationup.posLong = i["position"]["lng"]
         session.add(stationup)
         session.commit()
         weekcount=0
-    if halfhour >= 6:
+    if halfHour >= 6:
         try:
             w = requests.get(weatherfile)
             wjson = w.json()
         except:
             e = open("errorlog.txt", "w")
-            e.write("Dublin Bikes Connection Error:" + (time.time() - starttime))
+            e.write("Dublin Bikes Connection Error:" + (time.time() - startTime))
             e.close()
-            time.sleep(500 - ((time.time() - starttime) % 500))
+            time.sleep(500 - ((time.time() - startTime) % 500))
         w = requests.get(weatherfile)
         wjson = w.json()
         for i in wjson:
             if (session.query(Weather).filter_by(id=WeatherTime(i["date"],i["reportTime"])).first()) == None:
-                weatherup = Weatheradd(i,Weather())
-                session.add(weatherup)
+                weatherUpdate = Weatheradd(i,Weather())
+                session.add(weatherUpdate)
                 session.commit()
-        halfhour =0
+        halfHour =0
 
-    time.sleep(500 - ((time.time() - starttime) % 500))
+    time.sleep(500 - ((time.time() - startTime) % 500))

@@ -14,8 +14,6 @@ import time
 
 #Create the sql alchemy engine, bind the base metadata and initalise a Session
 engine = sqlalchemy.create_engine("mysql+mysqlconnector://admin:killthebrits@dbikes.cmf8vg83zpoy.eu-west-1.rds.amazonaws.com:3306/dbikes")
-#Base.metadata.create_all(bind=engine)
-connection = engine.connect()
 Session = sessionmaker(bind=engine)
 session= Session()
 

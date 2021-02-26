@@ -20,6 +20,7 @@ class Station(Base):
     __tablename__="stations"
 
     child = relationship("Update",uselist=False,back_populates="parent")
+    child2= relationship("History",uselist=False,back_populates="parent")
     id=Column("number", Integer, primary_key=True)
     name=Column("name", String(128))
     address=Column("address", String(128))
@@ -44,9 +45,9 @@ class Update(Base):
 class History(Base):
     # This defines the history table, which will archive the availability data for future analysis
     __tablename__="history"
-
+    parent = relationship("Station", back_populates="child2")
     id = Column("id",Integer,primary_key=True)
-    statnum = Column("number", Integer,)
+    statnum = Column("number", Integer,ForeignKey("stations.number"))
     avail = Column("available", String(128))
     bstands = Column("bstands", Integer)
     abstands = Column("available_bstands", Integer)
@@ -142,7 +143,7 @@ def Dynaadd(dict,table,hist=0):
         history.abstands = dict["available_bike_stands"]
         history.abikes = dict["available_bikes"]
         if dict["last_update"] == None:
-            history.update= None
+            history.update=None
         else:
             history.update = datetime.fromtimestamp(dict["last_update"] / 1000)
         return history

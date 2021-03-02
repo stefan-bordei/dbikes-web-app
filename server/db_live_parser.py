@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base, ConcreteBase
 from sqlalchemy.orm import sessionmaker
@@ -11,6 +13,7 @@ import datetime
 import time
 import os
 import dbinfo
+import json
 
 
 logging.basicConfig(filename='dbikes_live.log', 
@@ -41,7 +44,8 @@ def map_dynamic_data(obj):
             'Status' : obj['status'],
             'AvailableBikeStands' : obj['available_bike_stands'],
             'AvailableBikes' : obj['available_bikes'],
-            'LastUpdate' : datetime.datetime.now() }
+            'LastUpdate' : (None if obj['last_update'] == None else datetime.datetime.fromtimestamp(int(obj['last_update'] / 1e3))),
+            'RequestTime' : datetime.datetime.now()}
 
 
 def map_weather_data(obj):        
@@ -80,6 +84,7 @@ class DynamicStationsLive(Base):
     AvailableBikeStands = Column(Integer)
     AvailableBikes = Column(Integer)
     LastUpdate = Column(DateTime)
+    RequestTime = Column(DateTime)
     
     def update_table(self, obj):
         for elem in obj:
@@ -111,6 +116,7 @@ class DynamicStations(Base):
     AvailableBikeStands = Column(Integer)
     AvailableBikes = Column(Integer)
     LastUpdate = Column(DateTime)
+    RequestTime = Column(DateTime)
 
     def __repr__(self):
         """
@@ -185,7 +191,7 @@ while True and retry_count < 10:
                 else:
                     session.add(DynamicStationsLive(**data))
 
-                if not session.query(DynamicStations).filter(DynamicStations.Number == data['Number'], DynamicStations.LastUpdate == data['LastUpdate']).first():
+                if not session.query(DynamicStations).filter(DynamicStations.Number == data['Number'], DynamicStations.LastUpdate == data['RequestTime']).first():
                     session.add(DynamicStations(**data))
                 else:
                     logging.info(f"Avoiding duplicates!")

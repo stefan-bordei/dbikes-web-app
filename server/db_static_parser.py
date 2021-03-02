@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base, ConcreteBase
 from sqlalchemy.orm import sessionmaker
@@ -40,7 +42,8 @@ def map_static_data(obj):
             'PosLat' : obj['position']['lat'],
             'PosLng' : obj['position']['lng'],
             'BikeStands' : obj['bike_stands'],   
-            'LastUpdate' : datetime.datetime.now() }
+            'LastUpdate' : (None if obj['last_update'] == None else datetime.datetime.fromtimestamp(int(obj['last_update'] / 1e3))),
+            'RequestTime' : datetime.datetime.now()}
 
 def map_dynamic_data(obj):        
     """
@@ -76,6 +79,7 @@ class StaticStations(Base):
     PosLng = Column(Float)
     BikeStands = Column(Integer)
     LastUpdate = Column(DateTime)
+    RequestTime = Column(DateTime)
  
     def __repr__(self):
         """

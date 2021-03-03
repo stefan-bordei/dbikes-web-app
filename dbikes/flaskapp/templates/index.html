@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Flask app</title>
+    <link rel="shortcut icon" href="#">
+    <meta name="description" content="First index.html">
+    <meta name="author" content="Group19">
+    
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        let map;
+
+        function initMap() {
+            fetch("/stations").then(response => {
+                return response.json();
+            }).then(data => {
+                console.log("data: ", data);
+                
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 53.349804, lng: -6.260310 },
+                    zoom: 14,
+                });
+                
+                data.forEach(station => {
+                     const marker = new google.maps.Marker({
+                        position: { lat: station.PosLat, lng: station.PosLng },
+                        map: map,
+                    });
+                    marker.addListener("click", () => {
+                        const infowindow = new google.maps.InfoWindow({
+                            content: '<h2>' + station.Name + '</h2><br>BikeStands:' + station.BikeStands, 
+                        });
+                        infowindow.open(map, marker);
+                    });
+                });
+               
+                
+            }).catch(err => {
+                console.log("OOPS!", err);
+            })
+        }
+    </script>
+    <script
+	    src="https://maps.googleapis.com/maps/api/js?key=Your_API_Key&callback=initMap&libraries=&v=weekly"
+      async
+    ></script>
+</body>
+</html>

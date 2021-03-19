@@ -26,7 +26,7 @@ def stations():
 def prediction():
     return render_template("prediction.html")
 
-@app.route("/butFunc")
+@app.route("/btnFunc")
 def buttonPrediction():
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
     df = pd.read_sql_table("dynamic_stations", engine)

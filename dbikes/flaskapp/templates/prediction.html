@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Flask app</title>
+    <link rel="shortcut icon" href="#">
+    <meta name="description" content="First index.html">
+    <meta name="author" content="Group19">
+    <!--this lets the chart.js work-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
+</head>
+    <body>
+        <p>Shes working buachaill</p>
+        <div id="dublinBikeTable">
+            <table id="stationTable">
+                <th>Number</th>
+                <th>Name</th>
+            </table>
+        </div>
+        <div id="predictions">
+            <canvas id="dailyPrediction"></canvas>
+        
+        </div>
+        <script>
+            
+            // This is used for the prediction tables
+            const currentTime=Date.now();
+            //alert(currentTime);
+            const dayMilliseconds= 86400000;
+            
+            // This variable will be used later to store the dynamic table data
+            let datajson;
+            
+            // create the chart objects so can update it later
+            let dailyChart = document.getElementById("dailyPrediction").getContext("2d");
+            let dayChart= new Chart(dailyChart,{
+                type:"line",
+            });
+            
+            // This creates the table of stations and the button for the user to select the station
+                fetch("/stations")
+                .then(
+                function(response){
+                    if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                }
+                response.json().then(function(data){
+                                     console.log(data);
+                                data.forEach(station => {
+                var table = document.getElementById("stationTable");
+                                    // adds rows and populates it with the station number, name and a prediction button
+                                    var row = table.insertRow(-1);
+                                    var cell1 = row.insertCell(0);
+                                    var cell2 = row.insertCell(1);
+                                    var cell3 = row.insertCell(2);
+                                    cell1.innerHTML = station.Number;
+                                    cell2.innerHTML = station.Name;
+                                    var btn = document.createElement("BUTTON");
+                                    btn.textContent= "See prediction";
+                                    // sets the button ID to the station number
+                                    btn.setAttribute("id",station.Number);
+                                    cell3.appendChild(btn);
+                                    btn.addEventListener("click",buttonPrediction.bind(this,station.Number));
+                                    
+                
+            });
+                                     });
+                    }
+                    );
+            
+            // This gets the dynamic table data and saves it to the datajson variable
+                fetch("/butFunc")
+                .then(
+                function(response){
+                    if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                }
+                response.json().then(function(data){
+                                     datajson = data;
+                });
+                    }
+                    );
+            
+            
+            // Button functionality
+            function buttonPrediction(station_number){
+                console.log(station_number);
+                // empty arrays to save the individual variables to for chart purposes
+                var times = [];
+                var AvailBike = [];
+                var AvailStands=[];
+                // This stops duplicate time entries from being entered
+                let lastTime = 0;
+                // if the station number matches the ID of the button (which is its station number), is in the last 24 hours and isnt already been recorded
+                for(i in datajson){
+                    if ((datajson[i].Number == station_number) && (datajson[i].LastUpdate >= (currentTime - dayMilliseconds )) && (datajson[i].lastUpdate != lastTime)){
+                        timeCount = datajson[i].LastUpdate;
+                        times.push(datajson[i].LastUpdate);
+                        AvailBike.push(datajson[i].AvailableBikes);
+                        AvailStands.push(datajson[i].AvailableBikeStands);
+                    }
+                    
+                }
+                // this destroys any previous charts (Got buggy once you tried a few times, old ones would pop in and out)
+                if (window.dayChart){
+                    window.dayChart.destroy()
+                }
+                // Line data for bikes
+                var dataOne={
+                    label:"Free bikes",
+                    data:AvailBike
+                };
+                // line data for stands
+                var dataTwo={
+                    label:"Free Stands",
+                    data:AvailStands
+                }
+                // create the chart
+                window.dayChart= new Chart(dailyChart,{
+                    type:"line",
+                    data:{
+                        labels:times,
+                        datasets:[dataOne,dataTwo]
+                    }
+                
+            });
+            }
+            
+            
+            
+          
+            
+        </script>
+        <script
+	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQ60ZznWkdrHJc7wnCJqx67J_pjGNUebE&callback=initMap&libraries=&v=weekly"
+      async
+    ></script>
+    </body>
+</html>

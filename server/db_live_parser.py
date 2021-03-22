@@ -191,7 +191,7 @@ while True and retry_count < 10:
                 else:
                     session.add(DynamicStationsLive(**data))
 
-                if not session.query(DynamicStations).filter(DynamicStations.Number == data['Number'], DynamicStations.LastUpdate == data['RequestTime']).first():
+                if not session.query(DynamicStations).filter(DynamicStations.Number == data['Number'], DynamicStations.RequestTime == data['RequestTime']).first():
                     session.add(DynamicStations(**data))
                 else:
                     logging.info(f"Avoiding duplicates!")

@@ -22,6 +22,15 @@ def stations():
     df = pd.read_sql_table("static_stations", engine)
     return df.to_json(orient='records')
 
+@app.route("/prediction")
+def prediction():
+    return render_template("prediction.html")
+
+@app.route("/btnFunc")
+def buttonPrediction():
+    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+    df = pd.read_sql_table("dynamic_stations", engine)
+    return df.to_json(orient='records')
 
 if __name__ == "__main__":
     app.run(debug=True)

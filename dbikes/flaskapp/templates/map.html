@@ -18,10 +18,10 @@
         <a href="{{ url_for('about_us') }}">About us</a>
         <a href="{{ url_for('contacts') }}">Contacts</a>
       </div>
-    <div class='container'>
-        <div id="map" style=" width:450px; height:450px"></div>
-        <a href="{{ url_for('plan') }}"><div id="plan" ><img src="{{ url_for('static', filename='plan.jpg') }}" width="450" height="450"> </div></a>
-    </div>
+  
+        <div id="map" style=" width:900px; height:900px"></div>
+        
+
 
     
     <script>
@@ -37,11 +37,37 @@
                     center: { lat: 53.349804, lng: -6.260310 },
                     zoom: 14,
                 });
-                
+               const bikegreen ={
+    url: "{{ url_for('static', filename='green.png') }}",
+    scaledSize: new google.maps.Size(50, 50), 
+    origin: new google.maps.Point(0,0),
+    anchor: new google.maps.Point(0, 0) 
+};
+const bikered ={
+    url: "{{ url_for('static', filename='red.png') }}",
+    scaledSize: new google.maps.Size(50, 50), 
+    origin: new google.maps.Point(0,0),
+    anchor: new google.maps.Point(0, 0) 
+};
+ const bikeyel ={
+    url: "{{ url_for('static', filename='yel.png') }}",
+    scaledSize: new google.maps.Size(50, 50), 
+    origin: new google.maps.Point(0,0),
+    anchor: new google.maps.Point(0, 0) 
+};
+
+
                 data.forEach(station => {
+                    if (station.BikeStands>=20){icons=bikegreen}
+                    else if(20>station.BikeStands>=1){icons=bikeyel}
+                    else{icons=bikered}
+                    
                      const marker = new google.maps.Marker({
                         position: { lat: station.PosLat, lng: station.PosLng },
+                        icon:icons,
+
                         map: map,
+                        
                     });
                     marker.addListener("click", () => {
                         const infowindow = new google.maps.InfoWindow({
@@ -58,7 +84,7 @@
         }
     </script>
     <script
-	    src="https://maps.googleapis.com/maps/api/js?key=YourKeycallback=initMap&libraries=&v=weekly"
+	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEpDOT9RJcZepspcLh3d4rmf2tCYxykTQ&callback=initMap&libraries=&v=weekly"
       async
     ></script>
 </body>

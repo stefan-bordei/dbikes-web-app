@@ -15,6 +15,21 @@ DB_HOST = dbinfo.DB_DBIKES
 def hello():
     return render_template("index.html")
 
+@app.route("/plan")
+def plan():
+    return render_template("plan.html")
+
+@app.route("/about_us")
+def about_us():
+    return render_template("about_us.html")
+
+@app.route("/map")
+def mapbike():
+    return render_template("map.html")
+
+@app.route("/contacts")
+def contacts():
+    return render_template("contacts.html")
 
 @app.route("/stations")
 def stations():

@@ -24,15 +24,9 @@ def hello():
 def plan():
     return render_template("plan.html")
 
-@app.route("/about_us",methods=["GET","POST"])
+@app.route("/about_us")
 def about_us():
-    if request.method == 'POST':
-        data = request.get_json()
-        email = str(data["email"])
-        user_password = str(data["password"])
-        print(user_password, email)
 
-    return render_template("about_us.html")
 
 @app.route("/map")
 def mapbike():

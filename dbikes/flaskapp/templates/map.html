@@ -7,12 +7,14 @@
     <link rel="shortcut icon" href="#">
     <meta name="description" content="First index.html">
     <meta name="author" content="Group19">
-    
+    <!-- this lets char.js work -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
 </head>
 <body>
     <div class="topnav">
-        <a class="active" href="/"">Home</a>
+        <a class="active" href="/">Home</a>
         <a href="{{ url_for('mapbike') }}">Map</a>
         <a href="{{ url_for('plan') }}">Plan your trips</a>
         <a href="{{ url_for('about_us') }}">About us</a>
@@ -20,11 +22,196 @@
       </div>
   
         <div id="map" style=" width:900px; height:900px"></div>
+    
+        <div id="table_div">
+            <table id="station_table">
+                <tr>
+                    <th>Name</th>
+                    <th>Free Bikes</th>
+                    <th>Free Stands</th>
+                </tr>
+            </table>
+            
+        </div>
+    
+        <div id="Charts">
+            <canvas id="dailyChart"></canvas>
+            <canvas id="weeklyChart"></canvas>
+            
+        
+        </div>
         
 
 
     
     <script>
+        // This is used for the prediction tables
+            const currentTime=Date.now();
+            //alert(currentTime);
+            const dayMilliseconds= 86400000;
+            
+            // This variable will be used later to store the dynamic table data
+            //let datajson;
+            
+            // create the chart objects so can update it later
+            let dailyChart = document.getElementById("dailyChart").getContext("2d");
+            let dayChart= new Chart(dailyChart,{
+                type:"line",
+            });
+        
+            let weeklyChart = document.getElementById("weeklyChart").getContext("2d");
+            let weekChart= new Chart(dailyChart,{
+                type:"line",
+            });
+        
+        
+        
+        
+        
+        
+        // Functions that return the json data of calling the queries. Uses promises to allow for async operation (else the charts wouldnt be made correctly in time)
+        function json_getter_week(){
+            return new Promise((resolve,reject) => {
+                    fetch("/btnFunc").then(
+                    function(response){
+                    console.log(response)
+                    if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                }
+                response.json().then(function(data){
+                                    console.log("Table data: ",data)
+                                    //return data;
+                                    resolve(data)
+                });
+                    }
+                    );
+                
+                
+            })
+        };
+        function json_getter_day(){
+            return new Promise((resolve,reject) => {
+                    fetch("/btnFuncDay").then(
+                    function(response){
+                    console.log(response)
+                    if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                }
+                response.json().then(function(data){
+                                    console.log("Table data: ",data)
+                                    //return data;
+                                    resolve(data)
+                });
+                    }
+                    );
+                
+                
+            })
+        };
+        
+
+// This sends a variable (going to be the station number) back to flask to be used in a query
+function varSender(number){
+    console.log("WORKING")
+    console.log(number)
+
+    $.ajax({
+        type: 'POST',
+        url: '/varSender',
+        contentType: 'application/json;charset=UTF-8',
+        dataType: 'json',
+        data: JSON.stringify({number}),
+    });
+// stop link reloading the page
+    event.preventDefault();
+            
+        }
+        
+            // Button functionality
+                async function buttonPrediction(station_number,station_name){
+                    varSender(station_number);
+                    // empty arrays to save the individual variables to for chart purposes
+                    var daytimes = [];
+                    var dayAvailBike = [];
+                    var dayAvailStands=[];
+                    
+                    var weekTimes = []
+                    var weekAvailBikes=[]
+                    var weekAvailStands=[]
+                                        
+                    
+                    var jsonweek = await json_getter_week();
+                    var jsonday = await json_getter_day();
+                    
+                    // Assign each variable in the json files to its appropriate list
+                    for(i in jsonweek){
+                        weekTimes.push(jsonweek[i].LastUpdate);
+                        weekAvailBikes.push(jsonweek[i].AvailableBikes);
+                        weekAvailStands.push(jsonweek[i].AvailableBikeStands);
+                        
+                    }
+                    
+                    for(i in jsonday){
+                        daytimes.push(jsonday[i].LastUpdate);
+                        dayAvailBike.push(jsonday[i].AvailableBikes);
+                        dayAvailStands.push(jsonday[i].AvailableBikeStands);             
+                    }
+                    
+                    var table = document.getElementById("station_table")
+                    var row = table.insertRow(1);
+                    var cell1=row.insertCell(0);
+                    var cell2=row.insertCell(1);
+                    var cell3=row.insertCell(2);
+                    
+                    cell1.innerHTML=station_name;
+                    cell2.innerHTML=dayAvailBike[dayAvailBike.length-1];
+                    cell3.innerHTML=dayAvailStands[dayAvailStands.length-1];
+                // this destroys any previous charts (Got buggy once you tried a few times, old ones would pop in and out)
+                if (window.dayChart){
+                    window.dayChart.destroy()
+                    window.weekChart.destroy()
+                }
+                    
+                // Line data for bikes
+                var dataOne={
+                    label:"Free bikes",
+                    data:dayAvailBike
+                };
+                // line data for stands
+                var dataTwo={
+                    label:"Free Stands",
+                    data:dayAvailStands
+                }
+                
+                // Same data but for the weeks
+                var dataThree={
+                    label:"Free Bikes",
+                    data:weekAvailBikes
+                }
+                var dataFour={
+                    label:"Free Stands",
+                    data:weekAvailStands
+                }
+                // create the charts
+                window.dailyChart= new Chart(dailyChart,{
+                    type:"line",
+                    data:{
+                        labels:daytimes,
+                        datasets:[dataOne,dataTwo]
+                    }
+                });
+                    
+                window.weeklyChart =new Chart(weeklyChart,{
+                    type:"line",
+                    data:{
+                    labels:weekTimes,
+                    datasets:[dataThree,dataFour]
+                }
+                });
+                };
+        
         let map;
 
         function initMap() {
@@ -58,6 +245,12 @@ const bikered ={
 
 
                 data.forEach(station => {
+                    var btn = document.createElement("BUTTON");
+                    btn.textContent= (station.Name);
+                    // sets the button ID to the station number
+                    btn.setAttribute("id",station.Number);
+                    btn.addEventListener("click",buttonPrediction.bind(this,station.Number,station.Name))
+                    
                     if (station.BikeStands>=20){icons=bikegreen}
                     else if(20>station.BikeStands>=1){icons=bikeyel}
                     else{icons=bikered}
@@ -71,8 +264,8 @@ const bikered ={
                     });
                     marker.addListener("click", () => {
                         const infowindow = new google.maps.InfoWindow({
-                            content: '<h2>' + station.Name + '</h2><br>BikeStands:' + station.BikeStands, 
-                        });
+                            content:btn //+"<br>BikeStands:" + station.BikeStands, 
+                        })
                         infowindow.open(map, marker);
                     });
                 });
@@ -82,9 +275,16 @@ const bikered ={
                 console.log("OOPS!", err);
             })
         }
+        
+    
+  
+        
+
+        
+        
     </script>
     <script
-	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEpDOT9RJcZepspcLh3d4rmf2tCYxykTQ&callback=initMap&libraries=&v=weekly"
+	    src="https://maps.googleapis.com/maps/api/js?key=YourAPIKey&callback=initMap&libraries=&v=weekly"
       async
     ></script>
 </body>

@@ -2,90 +2,192 @@
 
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Flask app</title>
+    <meta charset="utf-8 name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dBikes</title>
     <link rel="shortcut icon" href="#">
     <meta name="description" content="First index.html">
     <meta name="author" content="Group19">
     
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
 </head>
 <body>
-    <div class="topnav">
-        <a class="active" href="/"">Home</a>
-        <a href="{{ url_for('mapbike') }}">Map</a>
+     <div class="nav">
+	    <a href="{{ url_for('home') }}">Home</a>
+        <a class='active' href="{{ url_for('mapbikes') }}">Map</a>
         <a href="{{ url_for('plan') }}">Plan your trips</a>
-        <a href="{{ url_for('about_us') }}">About us</a>
-        <a href="{{ url_for('contacts') }}">Contacts</a>
-      </div>
-  
-        <div id="map" style=" width:900px; height:900px"></div>
-        
-
-
+        <a href="{{ url_for('about') }}">About us</a>
+        <a href="{{ url_for('contacts') }}">Contact us</a>
+    </div>
     
-    <script>
-        let map;
+    
+    <div id="map"></div>
+    <div id="stationsTable"></div>
+    <div id="chart"></div>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-        function initMap() {
-            fetch("/stations").then(response => {
-                return response.json();
-            }).then(data => {
-                console.log("data: ", data);
+        <script>
+            var markers = [];
+            
+            
+            
+            // Load the Visualization API and the corechart package.
+            google.charts.load('current', {'packages':['corechart']});
+
+            // Set a callback to run when the Google Visualization API is loaded.
+            google.charts.setOnLoadCallback(drawChart);
+            
+            var xmlhttp = new XMLHttpRequest();
+            
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var myArr = JSON.parse(this.responseText);
+                    fillChart(myArr);
+                }
+            };
+            
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
+
                 
-                map = new google.maps.Map(document.getElementById("map"), {
-                    center: { lat: 53.349804, lng: -6.260310 },
-                    zoom: 14,
-                });
-               const bikegreen ={
-    url: "{{ url_for('static', filename='green.png') }}",
-    scaledSize: new google.maps.Size(50, 50), 
-    origin: new google.maps.Point(0,0),
-    anchor: new google.maps.Point(0, 0) 
-};
-const bikered ={
-    url: "{{ url_for('static', filename='red.png') }}",
-    scaledSize: new google.maps.Size(50, 50), 
-    origin: new google.maps.Point(0,0),
-    anchor: new google.maps.Point(0, 0) 
-};
- const bikeyel ={
-    url: "{{ url_for('static', filename='yel.png') }}",
-    scaledSize: new google.maps.Size(50, 50), 
-    origin: new google.maps.Point(0,0),
-    anchor: new google.maps.Point(0, 0) 
-};
+            var url = "/your_endpoint";
 
-
-                data.forEach(station => {
-                    if (station.BikeStands>=20){icons=bikegreen}
-                    else if(20>station.BikeStands>=1){icons=bikeyel}
-                    else{icons=bikered}
+            let map;
+            
+            function initMap() {
+                
+                fetch("/stations").then(response => {
+                    return response.json();
+                }).then(data => {
+                    console.log("data: ", data);
                     
-                     const marker = new google.maps.Marker({
-                        position: { lat: station.PosLat, lng: station.PosLng },
-                        icon:icons,
+                    map = new google.maps.Map(document.getElementById("map"), {
+                        center: { lat: 53.349804, lng: -6.260310 },
+                        zoom: 14,
+                    });
+                    const bikegreen ={
+                        url: "{{ url_for('static', filename='img/green.png') }}",
+                        scaledSize: new google.maps.Size(50, 50), 
+                        origin: new google.maps.Point(0,0),
+                        anchor: new google.maps.Point(0, 0) 
+                    };
+                    const bikered ={
+                        url: "{{ url_for('static', filename='img/red.png') }}",
+                        scaledSize: new google.maps.Size(50, 50), 
+                        origin: new google.maps.Point(0,0),
+                        anchor: new google.maps.Point(0, 0) 
+                    };
+                    const bikeyel ={
+                        url: "{{ url_for('static', filename='img/yel.png') }}",
+                        scaledSize: new google.maps.Size(50, 50), 
+                        origin: new google.maps.Point(0,0),
+                        anchor: new google.maps.Point(0, 0) 
+                    };
 
-                        map: map,
+
+                    data.forEach(station => {
+                        var iconColor;
+                        if (station.AvailableBikes>=20){iconColor = bikegreen}
+                        else if(station.AvailableBikes < 20 && station.AvailableBikes>=10){iconColor = bikeyel}
+                        else{iconColor = bikered}
+                        
+                        const marker = new google.maps.Marker({
+                            position: { lat: station.PosLat, lng: station.PosLng },
+                            icon: iconColor,
+
+                            map: map,
+                            
+                        });
+                        marker.addListener("click", () => {
+                            var showDetails = document.getElementById("stationsTable");
+                            
+                            let infowindow;
+                            if (infowindow) infowindow.close()
+                            infowindow = new google.maps.InfoWindow({
+                                content: '<h2>' + station.Name + '</h2>', 
+                            });
+                            //marker.setAnimation(google.maps.Animation.BOUNCE);
+                            
+                            showDetails.innerHTML =   "<h1>Number:" + station.Number +
+                                                      "</h1><h1>Name: " + station.Name +
+                                                      "</h1><h1>BikeStands: " + station.BikeStands + 
+                                                      "</h1><p>Available Bikes:" + station.AvailableBikes + 
+                                                      "</p><p>Available Stands:" + station.AvailableBikeStands + 
+                                                      "</p>";
+                          
+                            drawChart(station);
+                        });
                         
                     });
-                    marker.addListener("click", () => {
-                        const infowindow = new google.maps.InfoWindow({
-                            content: '<h2>' + station.Name + '</h2><br>BikeStands:' + station.BikeStands, 
-                        });
-                        infowindow.open(map, marker);
-                    });
+                    
+                }).catch(err => {
+                    console.log("OOPS!", err);
                 });
-               
+            }
+           
+          
+            function drawChart(station) {
+
+                            // Create the data table.
+                            var chartData = new google.visualization.DataTable();
+                            chartData.addColumn('string', 'Name');
+                            chartData.addColumn('number', 'Available Bikes');
+                            chartData.addRows([
+                            ['AvailableBikes', station.AvailableBikes],
+                            ['AvailableBikeStands', station.AvailableBikeStands]
+                            ]);
+
+                            // Set chart options
+                            var options = {'title':'Available Bikes vs Stands',
+                                        'width':'100%',
+                                        'height':500,
+                                        'margin-left': 'auto',
+                                        'margin-right': 'auto',};
+
+                            // Instantiate and draw our chart, passing in some options.
+                            var chart = new google.visualization.PieChart(document.getElementById('chart'));
+                            chart.draw(chartData, options);
+                        }
+            
+            
+            fetch("/stations")
+                .then(
+                function(response){
+                    if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                }
+                response.json().then(function(data){
+                                     console.log(data);
+                                data.forEach(station => {
+                var table = document.getElementById("stationTable");
+                                    // adds rows and populates it with the station number, name and a prediction button
+                                    var row = table.insertRow(-1);
+                                    var cell1 = row.insertCell(0);
+                                    var cell2 = row.insertCell(1);
+                                    var cell3 = row.insertCell(2);
+                                    cell1.innerHTML = station.Number;
+                                    cell2.innerHTML = station.Name;
+                                    var btn = document.createElement("BUTTON");
+                                    btn.textContent= "See prediction";
+                                    // sets the button ID to the station number
+                                    btn.setAttribute("id",station.Number);
+                                    cell3.appendChild(btn);
+                                    btn.addEventListener("click",buttonPrediction.bind(this,station.Number));
+                                });
+                            });
+                        }
+                    );
+            
+            
                 
-            }).catch(err => {
-                console.log("OOPS!", err);
-            })
-        }
-    </script>
-    <script
-	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEpDOT9RJcZepspcLh3d4rmf2tCYxykTQ&callback=initMap&libraries=&v=weekly"
-      async
-    ></script>
+        </script>
+        
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key=KEY&callback=initMap&libraries=&v=weekly"
+        async
+        ></script>
 </body>
 </html>

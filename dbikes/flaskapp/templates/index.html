@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Flask app</title>
+    <title>dBikes</title>
     <link rel="shortcut icon" href="#">
     <meta name="description" content="First index.html">
     <meta name="author" content="Group19">
@@ -11,54 +11,24 @@
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <div class="topnav">
-        <a class="active" href="/"">Home</a>
-        <a href="{{ url_for('mapbike') }}">Map</a>
+
+    <div class="nav">
+	    <a class="active" href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('mapbikes') }}">Map</a>
         <a href="{{ url_for('plan') }}">Plan your trips</a>
-        <a href="{{ url_for('about_us') }}">About us</a>
-        <a href="{{ url_for('contacts') }}">Contacts</a>
-      </div>
-    <div class='container'>
-        <div id="map" style=" width:450px; height:450px"></div>
-        <a href="{{ url_for('plan') }}"><div id="plan" ><img src="{{ url_for('static', filename='plan.jpg') }}" width="450" height="450"> </div></a>
+        <a href="{{ url_for('about') }}">About us</a>
+        <a href="{{ url_for('contacts') }}">Contact us</a>
     </div>
-
     
-    <script>
-        let map;
-
-        function initMap() {
-            fetch("/stations").then(response => {
-                return response.json();
-            }).then(data => {
-                console.log("data: ", data);
-                
-                map = new google.maps.Map(document.getElementById("map"), {
-                    center: { lat: 53.349804, lng: -6.260310 },
-                    zoom: 14,
-                });
-                
-                data.forEach(station => {
-                     const marker = new google.maps.Marker({
-                        position: { lat: station.PosLat, lng: station.PosLng },
-                        map: map,
-                    });
-                    marker.addListener("click", () => {
-                        const infowindow = new google.maps.InfoWindow({
-                            content: '<h2>' + station.Name + '</h2><br>BikeStands:' + station.BikeStands, 
-                        });
-                        infowindow.open(map, marker);
-                    });
-                });
-               
-                
-            }).catch(err => {
-                console.log("OOPS!", err);
-            })
-        }
-    </script>
+     <div class="hero-image" >
+        <div class="hero-text">
+            <h1>We are dBikes</h1>
+            <p>Never miss a bike trip!</p>
+        </div>
+    </div> 
+    
     <script
-	    src="https://maps.googleapis.com/maps/api/js?key=YourKeycallback=initMap&libraries=&v=weekly"
+	    src="https://maps.googleapis.com/maps/api/js?key=KEY&callback=initMap&libraries=&v=weekly"
       async
     ></script>
 </body>

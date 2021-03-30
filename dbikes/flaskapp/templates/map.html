@@ -128,6 +128,47 @@ function varSender(number){
     event.preventDefault();
             
         }
+
+        function dayConverter(day_number){
+            var days={
+                0 : "Sunday",
+                1 : "Monday",
+                2 : "Tuesday",
+                3 : "Wednesday",
+                4 : "Thursday",
+                5 : "Friday",
+                6 : "Saturday",
+                
+            };
+            return days[day_number];
+            
+            /*
+            switch(day_number){
+                case 0:
+                    return "Sunday";
+                    break;
+                case 1:
+                    return "Monday";
+                    break;
+                case 2:
+                    return "Tuesday";
+                    break;
+                case 3:
+                    return "Wednesday";
+                    break;
+                case 4:
+                    return "Thursday";
+                    break;
+                case 5:
+                    return "Friday";
+                    break;
+                case 6:
+                    return "Saturday";
+                    break;
+            }
+            */
+            
+        }
         
             // Button functionality
                 async function buttonPrediction(station_number,station_name){
@@ -147,14 +188,14 @@ function varSender(number){
                     
                     // Assign each variable in the json files to its appropriate list
                     for(i in jsonweek){
-                        weekTimes.push(jsonweek[i].LastUpdate);
+                        weekTimes.push(dayConverter(new Date(jsonweek[i].LastUpdate).getDay()));
                         weekAvailBikes.push(jsonweek[i].AvailableBikes);
                         weekAvailStands.push(jsonweek[i].AvailableBikeStands);
                         
                     }
                     
                     for(i in jsonday){
-                        daytimes.push(jsonday[i].LastUpdate);
+                        daytimes.push(String(new Date(jsonday[i].LastUpdate).getHours()) + ":00");
                         dayAvailBike.push(jsonday[i].AvailableBikes);
                         dayAvailStands.push(jsonday[i].AvailableBikeStands);             
                     }
@@ -284,7 +325,7 @@ const bikered ={
         
     </script>
     <script
-	    src="https://maps.googleapis.com/maps/api/js?key=YourAPIKey&callback=initMap&libraries=&v=weekly"
+	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQ60ZznWkdrHJc7wnCJqx67J_pjGNUebE&callback=initMap&libraries=&v=weekly"
       async
     ></script>
 </body>

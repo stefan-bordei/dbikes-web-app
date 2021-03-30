@@ -26,6 +26,7 @@ def plan():
 
 @app.route("/about_us")
 def about_us():
+    return render_template("about_us.html")
 
 
 @app.route("/map")
@@ -51,7 +52,6 @@ def prediction():
 #function that gets the station number from the html webpage and saves it to the session
 @app.route("/varSender",methods=["GET","POST"])
 def varGet():
-    print("IT FUCKIN GOT THIS FAR")
     if request.method == "POST":
         data=request.get_json()
         session["station_number"] = str(data["number"])
@@ -64,7 +64,7 @@ def buttonFunction():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
     dateDiff = (datetime.datetime.now() - datetime.timedelta(7)).timestamp()
-    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number}", engine)
+    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY DAY(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
 
@@ -74,7 +74,7 @@ def buttonFunctionDay():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
     dateDiff = (datetime.datetime.now() - datetime.timedelta(1)).timestamp()
-    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number}", engine)
+    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY HOUR (dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
 

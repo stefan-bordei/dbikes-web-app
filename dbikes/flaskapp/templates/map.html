@@ -10,6 +10,9 @@
     
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     
 </head>
 <body>
@@ -21,173 +24,268 @@
         <a href="{{ url_for('contacts') }}">Contact us</a>
     </div>
     
-    
     <div id="map"></div>
     <div id="stationsTable"></div>
     <div id="chart"></div>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <div id="Charts">
+        <canvas id="dailyChart"></canvas>
+        <canvas id="weeklyChart"></canvas>
+    </div>
+   
 
-        <script>
-            var markers = [];
-            
-            
-            
-            // Load the Visualization API and the corechart package.
-            google.charts.load('current', {'packages':['corechart']});
-
-            // Set a callback to run when the Google Visualization API is loaded.
-            google.charts.setOnLoadCallback(drawChart);
-            
-            var xmlhttp = new XMLHttpRequest();
-            
-            xmlhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var myArr = JSON.parse(this.responseText);
-                    fillChart(myArr);
-                }
-            };
-            
-            xmlhttp.open("GET", url, true);
-            xmlhttp.send();
-
-                
-            var url = "/your_endpoint";
-
-            let map;
-            
-            function initMap() {
-                
-                fetch("/stations").then(response => {
-                    return response.json();
-                }).then(data => {
-                    console.log("data: ", data);
-                    
-                    map = new google.maps.Map(document.getElementById("map"), {
-                        center: { lat: 53.349804, lng: -6.260310 },
-                        zoom: 14,
-                    });
-                    const bikegreen ={
-                        url: "{{ url_for('static', filename='img/green.png') }}",
-                        scaledSize: new google.maps.Size(50, 50), 
-                        origin: new google.maps.Point(0,0),
-                        anchor: new google.maps.Point(0, 0) 
-                    };
-                    const bikered ={
-                        url: "{{ url_for('static', filename='img/red.png') }}",
-                        scaledSize: new google.maps.Size(50, 50), 
-                        origin: new google.maps.Point(0,0),
-                        anchor: new google.maps.Point(0, 0) 
-                    };
-                    const bikeyel ={
-                        url: "{{ url_for('static', filename='img/yel.png') }}",
-                        scaledSize: new google.maps.Size(50, 50), 
-                        origin: new google.maps.Point(0,0),
-                        anchor: new google.maps.Point(0, 0) 
-                    };
-
-
-                    data.forEach(station => {
-                        var iconColor;
-                        if (station.AvailableBikes>=20){iconColor = bikegreen}
-                        else if(station.AvailableBikes < 20 && station.AvailableBikes>=10){iconColor = bikeyel}
-                        else{iconColor = bikered}
-                        
-                        const marker = new google.maps.Marker({
-                            position: { lat: station.PosLat, lng: station.PosLng },
-                            icon: iconColor,
-
-                            map: map,
-                            
-                        });
-                        marker.addListener("click", () => {
-                            var showDetails = document.getElementById("stationsTable");
-                            
-                            let infowindow;
-                            if (infowindow) infowindow.close()
-                            infowindow = new google.maps.InfoWindow({
-                                content: '<h2>' + station.Name + '</h2>', 
-                            });
-                            //marker.setAnimation(google.maps.Animation.BOUNCE);
-                            
-                            showDetails.innerHTML =   "<h1>Number:" + station.Number +
-                                                      "</h1><h1>Name: " + station.Name +
-                                                      "</h1><h1>BikeStands: " + station.BikeStands + 
-                                                      "</h1><p>Available Bikes:" + station.AvailableBikes + 
-                                                      "</p><p>Available Stands:" + station.AvailableBikeStands + 
-                                                      "</p>";
-                          
-                            drawChart(station);
-                        });
-                        
-                    });
-                    
-                }).catch(err => {
-                    console.log("OOPS!", err);
-                });
-            }
-           
-          
-            function drawChart(station) {
-
-                            // Create the data table.
-                            var chartData = new google.visualization.DataTable();
-                            chartData.addColumn('string', 'Name');
-                            chartData.addColumn('number', 'Available Bikes');
-                            chartData.addRows([
-                            ['AvailableBikes', station.AvailableBikes],
-                            ['AvailableBikeStands', station.AvailableBikeStands]
-                            ]);
-
-                            // Set chart options
-                            var options = {'title':'Available Bikes vs Stands',
-                                        'width':'100%',
-                                        'height':500,
-                                        'margin-left': 'auto',
-                                        'margin-right': 'auto',};
-
-                            // Instantiate and draw our chart, passing in some options.
-                            var chart = new google.visualization.PieChart(document.getElementById('chart'));
-                            chart.draw(chartData, options);
-                        }
-            
-            
-            fetch("/stations")
-                .then(
-                function(response){
-                    if (response.status !== 200){
-                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
-                    return;
-                }
-                response.json().then(function(data){
-                                     console.log(data);
-                                data.forEach(station => {
-                var table = document.getElementById("stationTable");
-                                    // adds rows and populates it with the station number, name and a prediction button
-                                    var row = table.insertRow(-1);
-                                    var cell1 = row.insertCell(0);
-                                    var cell2 = row.insertCell(1);
-                                    var cell3 = row.insertCell(2);
-                                    cell1.innerHTML = station.Number;
-                                    cell2.innerHTML = station.Name;
-                                    var btn = document.createElement("BUTTON");
-                                    btn.textContent= "See prediction";
-                                    // sets the button ID to the station number
-                                    btn.setAttribute("id",station.Number);
-                                    cell3.appendChild(btn);
-                                    btn.addEventListener("click",buttonPrediction.bind(this,station.Number));
-                                });
-                            });
-                        }
-                    );
-            
-            
-                
-        </script>
+    <script>
+        var markers = [];
         
-        <script
-            src="https://maps.googleapis.com/maps/api/js?key=KEY&callback=initMap&libraries=&v=weekly"
-        async
-        ></script>
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {'packages':['corechart']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(drawChart);
+
+        
+        let dailyChart = document.getElementById("dailyChart").getContext("2d");
+        let dayChart= new Chart(dailyChart,{
+            type:"line",
+        });
+
+        let weeklyChart = document.getElementById("weeklyChart").getContext("2d");
+        let weekChart= new Chart(dailyChart,{
+            type:"line",
+        });
+        
+        let map;
+        
+        function initMap() {
+            
+            fetch("/stations").then(response => {
+                return response.json();
+            }).then(data => {
+                console.log("data: ", data);
+                
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 53.349804, lng: -6.260310 },
+                    zoom: 14,
+                });
+                const bikegreen ={
+                    url: "{{ url_for('static', filename='img/green.png') }}",
+                    scaledSize: new google.maps.Size(50, 50), 
+                    origin: new google.maps.Point(0,0),
+                    anchor: new google.maps.Point(0, 0) 
+                };
+                const bikered ={
+                    url: "{{ url_for('static', filename='img/red.png') }}",
+                    scaledSize: new google.maps.Size(50, 50), 
+                    origin: new google.maps.Point(0,0),
+                    anchor: new google.maps.Point(0, 0) 
+                };
+                const bikeyel ={
+                    url: "{{ url_for('static', filename='img/yel.png') }}",
+                    scaledSize: new google.maps.Size(50, 50), 
+                    origin: new google.maps.Point(0,0),
+                    anchor: new google.maps.Point(0, 0) 
+                };
+
+
+                data.forEach(station => {
+                    var iconColor;
+                    if (station.AvailableBikes>=20){
+                        iconColor = bikegreen;
+                    }else if (station.AvailableBikes < 20 && station.AvailableBikes>=10){
+                        iconColor = bikeyel;
+                    }else{
+                        iconColor = bikered;
+                    }
+                    
+                    const marker = new google.maps.Marker({
+                        position: { lat: station.PosLat, lng: station.PosLng },
+                        icon: iconColor,
+                        map: map,
+                    });
+                    marker.addListener("click", () => {
+                        var showDetails = document.getElementById("stationsTable");
+                        showDetails.innerHTML =   "<h1>Number:" + station.Number +
+                                                    "</h1><h1>Name: " + station.Name +
+                                                    "</h1><h1>BikeStands: " + station.BikeStands + 
+                                                    "</h1><p>Available Bikes:" + station.AvailableBikes + 
+                                                    "</p><p>Available Stands:" + station.AvailableBikeStands + 
+                                                    "</p>";
+                        
+                        drawChart(station);
+                        buttonPrediction(station.Number, station.Name);
+                    });
+                });
+            }).catch(err => {
+                console.log("OOPS!", err);
+            });
+        }
+        
+        // draw the PIE Chart    
+        function drawChart(station) {
+            // Create the data table.
+            var chartData = new google.visualization.DataTable();
+            chartData.addColumn('string', 'Name');
+            chartData.addColumn('number', 'Available Bikes');
+            chartData.addRows([
+            ['AvailableBikes', station.AvailableBikes],
+            ['AvailableBikeStands', station.AvailableBikeStands]
+            ]);
+
+            // Set chart options
+            var options = {'title':'Available Bikes vs Stands',
+                        'width':'100%',
+                        'height':500,
+                        'margin-left': 'auto',
+                        'margin-right': 'auto',};
+
+            // Instantiate and draw our chart, passing in some options.
+            var chart = new google.visualization.PieChart(document.getElementById('chart'));
+            chart.draw(chartData, options);
+        }
+    
+    // Functions that return the json data of calling the queries. Uses promises to allow for async operation (else the charts wouldnt be made correctly in time)
+    function json_getter_week(){
+        return new Promise((resolve,reject) => {
+                fetch("/btnFunc").then(
+                function(response){
+                    console.log(response)
+                    if (response.status !== 200){
+                        console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                        return;
+                        }
+                response.json().then(function(data){
+                    console.log("Table data week: ",data)
+                    //return data;
+                    resolve(data)
+                });
+                });
+        })};
+    function json_getter_day(){
+        return new Promise((resolve,reject) => {
+                fetch("/btnFuncDay").then(
+                function(response){
+                    console.log(response)
+                    if (response.status !== 200){
+                        console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                        return;
+                    }
+                response.json().then(function(data){
+                    console.log("Table data day: ",data)
+                    //return data;
+                    resolve(data)
+                });
+                });
+        })};
+    
+
+    // This sends a variable (going to be the station number) back to flask to be used in a query
+    function varSender(number){
+        console.log("WORKING")
+        console.log(number)
+
+        $.ajax({
+            type: 'POST',
+            url: '/varSender',
+            contentType: 'application/json;charset=UTF-8',
+            dataType: 'json',
+            data: JSON.stringify({number}),
+        });
+        // stop link reloading the page
+        event.preventDefault();
+            
+    }
+    
+    // Button functionality
+    async function buttonPrediction(station_number,station_name){
+        varSender(station_number);
+        // empty arrays to save the individual variables to for chart purposes
+        var daytimes = [];
+        var dayAvailBike = [];
+        var dayAvailStands=[];
+        var weekTimes = []
+        var weekAvailBikes=[]
+        var weekAvailStands=[]
+    
+        var jsonweek = await json_getter_week();
+        var jsonday = await json_getter_day();
+        
+        // Assign each variable in the json files to its appropriate list
+        for(i in jsonweek){
+            weekTimes.push(dayConverter(new Date(jsonweek[i].LastUpdate).getDay()));
+            weekAvailBikes.push(jsonweek[i].AvailableBikes);
+            weekAvailStands.push(jsonweek[i].AvailableBikeStands);
+            
+        }
+        
+        for(i in jsonday){
+            daytimes.push(String(new Date(jsonday[i].LastUpdate).getHours()) + ":00");
+            dayAvailBike.push(jsonday[i].AvailableBikes);
+            dayAvailStands.push(jsonday[i].AvailableBikeStands);             
+        }
+        
+        
+        // this destroys any previous charts (Got buggy once you tried a few times, old ones would pop in and out)
+        if (window.dayChart){
+            window.dayChart.destroy();
+            window.weekChart.destroy();
+        }
+            
+        // Line data for bikes
+        var dataOne={
+            label:"Free bikes",
+            data:dayAvailBike,
+        };
+        // line data for stands
+        var dataTwo={
+            label:"Free Stands",
+            data:dayAvailStands
+        }
+        
+        // Same data but for the weeks
+        var dataThree={
+            label:"Free Bikes",
+            data:weekAvailBikes,
+        }
+        var dataFour={
+            label:"Free Stands",
+            data:weekAvailStands
+        }
+        // create the charts
+        window.dailyChart= new Chart(dailyChart,{
+            type:"line",
+            data:{
+                labels:daytimes,
+                datasets:[dataOne,dataTwo]
+            },
+        });
+            
+        window.weeklyChart =new Chart(weeklyChart,{
+            type:"line",
+            data:{
+                labels:weekTimes,
+                datasets:[dataThree,dataFour]
+            }
+        });
+    };
+        
+    function dayConverter(day_number){
+        var days={
+            0 : "Sunday",
+            1 : "Monday",
+            2 : "Tuesday",
+            3 : "Wednesday",
+            4 : "Thursday",
+            5 : "Friday",
+            6 : "Saturday",
+
+        };
+        return days[day_number];
+    }
+            
+    </script>
+    
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=KEY&callback=initMap&libraries=&v=weekly"
+    async
+    ></script>
 </body>
 </html>

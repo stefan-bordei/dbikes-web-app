@@ -1,7 +1,4 @@
 
-
-
-
 #map { 
 height: 45%; 
 width :95%; 
@@ -18,7 +15,7 @@ margin-right:auto;
     text-align: center;
 }
 
-#chart {
+#Charts, chart {
     height: auto;
     width: 50%;
     display: block;

@@ -4,6 +4,7 @@ import json
 import dbinfo
 import pandas as pd
 import datetime
+from datetime import timedelta
 
 
 app = Flask(__name__)
@@ -17,19 +18,19 @@ DB_HOST = dbinfo.DB_DBIKES
 
 
 @app.route("/")
-def hello():
+def home():
     return render_template("index.html")
 
 @app.route("/plan")
 def plan():
-    return render_template("plan.html")
+    return render_template("prediction.html")
 
-@app.route("/about_us")
-def about_us():
-
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 @app.route("/map")
-def mapbike():
+def mapbikes():
     return render_template("map.html")
 
 @app.route("/contacts")
@@ -39,19 +40,17 @@ def contacts():
 @app.route("/stations")
 def stations():
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
-    df = pd.read_sql_table("static_stations", engine)
-    return df.to_json(orient='records')
+    df_static = pd.read_sql_table("static_stations", engine)
+    df_live = pd.read_sql_table("dynamic_stations_live", engine)
+    return df_static.merge(df_live, on=["Number"]).to_json(orient='records')
 
 @app.route("/prediction")
 def prediction():
     return render_template("prediction.html")
 
-
-
 #function that gets the station number from the html webpage and saves it to the session
 @app.route("/varSender",methods=["GET","POST"])
 def varGet():
-    print("IT FUCKIN GOT THIS FAR")
     if request.method == "POST":
         data=request.get_json()
         session["station_number"] = str(data["number"])
@@ -64,7 +63,7 @@ def buttonFunction():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
     dateDiff = (datetime.datetime.now() - datetime.timedelta(7)).timestamp()
-    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number}", engine)
+    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY DAY(dynamic_stations.LastUpdate) ORDER BY DAY(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
 
@@ -74,9 +73,9 @@ def buttonFunctionDay():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
     dateDiff = (datetime.datetime.now() - datetime.timedelta(1)).timestamp()
-    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number}", engine)
+    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY HOUR (dynamic_stations.LastUpdate) ORDER BY HOUR(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True) 

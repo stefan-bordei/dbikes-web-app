@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Flask app</title>
+    <title>dBikes</title>
     <link rel="shortcut icon" href="#">
     <meta name="description" content="First index.html">
     <meta name="author" content="Group19">
@@ -11,13 +11,39 @@
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <div class="topnav">
-        <a class="active" href="/"">Home</a>
-        <a href="{{ url_for('mapbike') }}">Map</a>
+
+    <div class="nav">
+	    <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('mapbikes') }}">Map</a>
         <a href="{{ url_for('plan') }}">Plan your trips</a>
-        <a href="{{ url_for('about_us') }}">About us</a>
-        <a href="{{ url_for('contacts') }}">contacts</a>
-      </div>
+        <a href="{{ url_for('about') }}">About us</a>
+        <a class='active' href="{{ url_for('contacts') }}">Contact us</a>
+    </div>
+
+    <div class="container-form">
+    <h3>Contact Form</h3>
+    <form action="/action_page.php">
+        <label for="fname">First Name</label>
+        <input type="text" id="fname" name="firstname" placeholder="Your name..">
+
+        <label for="lname">Last Name</label>
+        <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+        
+        <label for="eaddr">Email Address</label>
+        <input type="text" id="eaddr" name="emailAddress" placeholder="Your email address..">
+
+        <label for="country">Country</label>
+        <select id="country" name="country">
+        <option value="ireland">Ireland</option>
+        <option value="notIreland">Not Ireland</option>
+        </select>
+
+        <label for="subject">Subject</label>
+        <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+
+        <input type="submit" value="Submit">
+    </form>
+    </div>
     
 </body>
 </html>

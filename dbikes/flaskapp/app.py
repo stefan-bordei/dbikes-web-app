@@ -15,7 +15,7 @@ app.secret_key = "Kilkenny is the best county, come at me bro"
 DB_NAME = dbinfo.DB_DBIKES_USER
 DB_PASS = dbinfo.DB_DBIKES_PASS
 DB_HOST = dbinfo.DB_DBIKES
-
+GM_KEY = dbinfo.GMAPS_KEY
 
 @app.route("/")
 def home():
@@ -31,7 +31,7 @@ def about():
 
 @app.route("/map")
 def mapbikes():
-    return render_template("map.html")
+    return render_template("map.html", apiKey = GM_KEY)
 
 @app.route("/contacts")
 def contacts():
@@ -62,8 +62,9 @@ def varGet():
 def buttonFunction():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
-    dateDiff = (datetime.datetime.now() - datetime.timedelta(7)).timestamp()
-    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY DAY(dynamic_stations.LastUpdate) ORDER BY DAY(dynamic_stations.LastUpdate)", engine)
+    #dateDiff = (datetime.datetime.now() - datetime.timedelta(7)).timestamp()
+    #dateDiff = datetime.timedelta(7).timestamp()
+    df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE dynamic_stations.LastUpdate > DATE(NOW()) - INTERVAL 6 DAY AND Number = {number} GROUP BY DAY (dynamic_stations.LastUpdate) ORDER BY DAY(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
 

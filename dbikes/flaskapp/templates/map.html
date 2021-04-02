@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-    <meta charset="utf-8 name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dBikes</title>
     <link rel="shortcut icon" href="#">
     <meta name="description" content="First index.html">
@@ -22,6 +22,11 @@
         <a href="{{ url_for('plan') }}">Plan your trips</a>
         <a href="{{ url_for('about') }}">About us</a>
         <a href="{{ url_for('contacts') }}">Contact us</a>
+         <! -- THIS CREATES THE DROPDOWN MENU -->
+         <select id = "dropdown" onchange="dropDown(this)">
+         <option>Select a station</option>
+         </select>
+         
     </div>
     
     <div id="map"></div>
@@ -57,6 +62,8 @@
         
         function initMap() {
             
+            
+            
             fetch("/stations").then(response => {
                 return response.json();
             }).then(data => {
@@ -87,6 +94,15 @@
 
 
                 data.forEach(station => {
+                    
+                    // This creates a dropdown menu item with the text of the station name and a value of the station number (This will be used for displaying the right stations information)
+                    var dropdown=document.getElementById("dropdown");
+                    var option = document.createElement("option")
+                    option.text= station.Name
+                    option.value=station.Number
+                    dropdown.appendChild(option)
+                    
+                    
                     var iconColor;
                     if (station.AvailableBikes>=20){
                         iconColor = bikegreen;
@@ -110,7 +126,7 @@
                                                     "</p><p>Available Stands:" + station.AvailableBikeStands + 
                                                     "</p>";
                         
-                        drawChart(station);
+                        drawChart(station,station.AvailableBikes,station.AvailableBikeStands);
                         buttonPrediction(station.Number, station.Name);
                     });
                 });
@@ -119,15 +135,53 @@
             });
         }
         
+        // Function for dropdown menu functionality
+        function dropDown(selectObject){
+            //testing logs
+            console.log("DROPDOWN FUNCTION")
+            console.log(selectObject.value)
+            
+            // Fetch the stations
+            fetch("/stations").then(response =>{
+                return response.json();
+            }).then(data=> {
+                console.log("DROPDOWN",data)
+                data.forEach(station => {
+                    //if the station number matches
+                    if(station.Number == selectObject.value){
+                        // Populate the data the same way the marker click does
+                        var showDetails = document.getElementById("stationsTable");
+                        showDetails.innerHTML =   "<h1>Number:" + station.Number +
+                                                    "</h1><h1>Name: " + station.Name +
+                                                    "</h1><h1>BikeStands: " + station.BikeStands + 
+                                                    "</h1><p>Available Bikes:" + station.AvailableBikes + 
+                                                    "</p><p>Available Stands:" + station.AvailableBikeStands + 
+                                                    "</p>";
+                        
+                        drawChart(station,station.AvailableBikes,station.AvailableBikeStands);
+                        console.log("DROPDOWN VARIABLES",station.Number,station.Name)
+                        buttonPrediction(station.Number, station.Name);
+                    
+                }
+                
+                })
+            }).catch(err => {
+                console.log("WHY GOD WHY",err)
+            });
+                
+            }
+        
+        
+        
         // draw the PIE Chart    
-        function drawChart(station) {
+        function drawChart(station,bikes,bstands) {
             // Create the data table.
             var chartData = new google.visualization.DataTable();
             chartData.addColumn('string', 'Name');
             chartData.addColumn('number', 'Available Bikes');
             chartData.addRows([
-            ['AvailableBikes', station.AvailableBikes],
-            ['AvailableBikeStands', station.AvailableBikeStands]
+            ['AvailableBikes', bikes],
+            ['AvailableBikeStands', bstands]
             ]);
 
             // Set chart options
@@ -190,12 +244,14 @@
             data: JSON.stringify({number}),
         });
         // stop link reloading the page
-        event.preventDefault();
+        //event.preventDefault();
             
     }
     
     // Button functionality
     async function buttonPrediction(station_number,station_name){
+        console.log("CHART BUTTON WORKING")
+        console.log(station_number,station_name);
         varSender(station_number);
         // empty arrays to save the individual variables to for chart purposes
         var daytimes = [];
@@ -284,7 +340,7 @@
     </script>
     
     <script
-        src="https://maps.googleapis.com/maps/api/js?key=KEY&callback=initMap&libraries=&v=weekly"
+        src="https://maps.googleapis.com/maps/api/js?key=APIKEY&callback=initMap&libraries=&v=weekly"
     async
     ></script>
 </body>

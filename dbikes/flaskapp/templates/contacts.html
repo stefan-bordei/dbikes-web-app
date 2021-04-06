@@ -11,38 +11,44 @@
     <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet" type="text/css">
 </head>
 <body>
-
-    <div class="nav">
-	    <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('mapbikes') }}">Map</a>
-        <a href="{{ url_for('plan') }}">Plan your trips</a>
-        <a href="{{ url_for('about') }}">About us</a>
-        <a class='active' href="{{ url_for('contacts') }}">Contact us</a>
+    
+    <div class="main-header">
+        <div class="nav main-nav">
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('mapbikes') }}">Map</a></li>
+                <li><a href="{{ url_for('plan') }}">Plan your trips</a></li>
+                <li><a href="{{ url_for('about') }}">About us</a></li>
+                <li><a class='active' href="{{ url_for('contacts') }}">Contact us</a></li>
+            </ul>
+        </div>
     </div>
 
-    <div class="container-form">
-    <h3>Contact Form</h3>
-    <form action="/action_page.php">
-        <label for="fname">First Name</label>
-        <input type="text" id="fname" name="firstname" placeholder="Your name..">
+    <div class="main-body">
+        <div class="container-form">
+            <h3>Contact Form</h3>
+            <form action="/contact" meyhod ="POST">
+                <label for="fname">First Name</label>
+                <input type="text" id="fname" name="firstname" placeholder="Your name..">
 
-        <label for="lname">Last Name</label>
-        <input type="text" id="lname" name="lastname" placeholder="Your last name..">
-        
-        <label for="eaddr">Email Address</label>
-        <input type="text" id="eaddr" name="emailAddress" placeholder="Your email address..">
+                <label for="lname">Last Name</label>
+                <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+                
+                <label for="eaddr">Email Address</label>
+                <input type="text" id="eaddr" name="emailAddress" placeholder="Your email address..">
 
-        <label for="country">Country</label>
-        <select id="country" name="country">
-        <option value="ireland">Ireland</option>
-        <option value="notIreland">Not Ireland</option>
-        </select>
+                <label for="country">Country</label>
+                <select id="country" name="country">
+                <option value="ireland">Ireland</option>
+                <option value="notIreland">Not Ireland</option>
+                </select>
 
-        <label for="subject">Subject</label>
-        <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+                <label for="subject">Subject</label>
+                <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
 
-        <input type="submit" value="Submit">
-    </form>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
     </div>
     
 </body>

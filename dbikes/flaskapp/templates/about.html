@@ -12,60 +12,66 @@
 </head>
 <body>
 
-    <div class="nav">
-	    <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('mapbikes') }}">Map</a>
-        <a href="{{ url_for('plan') }}">Plan your trips</a>
-        <a class='active' href="{{ url_for('about') }}">About us</a>
-        <a href="{{ url_for('contacts') }}">Contact us</a>
+    <div class="main-header">
+        <div class="nav main-nav">
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('mapbikes') }}">Map</a></li>
+                <li><a href="{{ url_for('plan') }}">Plan your trips</a></li>
+                <li><a class='active' href="{{ url_for('about') }}">About us</a></li>
+                <li><a href="{{ url_for('contacts') }}">Contact us</a></li>
+            </ul>
+        </div>
     </div>
     
-     <div class="about-section">
-        <h1>About Us Page</h1>
-        <p>Some text about who we are and what we do.</p>
-        </div>
+    <div class="main-body">
+        <div class="about-section">
+            <h1>About Us Page</h1>
+            <p>Some text about who we are and what we do.</p>
+            </div>
 
-        <h2 style="text-align:center">Our Team</h2>
-        <div class="row">
-        <div class="column">
-            <div class="card">
-            <img src="{{ url_for('static', filename='img/class3.png') }}" alt="sam" style="width:100%">
-            <div class="container">
-                <h2>Sam</h2>
-                <p class="title">Student Damage Dealer</p>
-                <p>Some text that describes me lorem ipsum ipsum lorem.</p>
-                <p>sam@rocks.com</p>
-                <p><button class="button">DO NOT Contact</button></p>
+            <h2 style="text-align:center">Our Team</h2>
+            <div class="row">
+            <div class="column">
+                <div class="card">
+                <img src="{{ url_for('static', filename='img/class3.png') }}" alt="sam" style="width:100%">
+                <div class="container">
+                    <h2>Sam</h2>
+                    <p class="title">Student Damage Dealer</p>
+                    <p>Some text that describes me lorem ipsum ipsum lorem.</p>
+                    <p>sam@rocks.com</p>
+                    <p><button class="button">DO NOT Contact</button></p>
+                </div>
+                </div>
             </div>
-            </div>
-        </div>
 
-        <div class="column">
-            <div class="card">
-            <img src="{{ url_for('static', filename='img/class1.jpg') }}" alt="ed" style="width:100%">
-            <div class="container">
-                <h2>Ed</h2>
-                <p class="title">Student Support</p>
-                <p>Some text that describes me lorem ipsum ipsum lorem.</p>
-                <p>ed@rocks.com</p>
-                <p><button class="button">DO NOT Contact</button></p>
+            <div class="column">
+                <div class="card">
+                <img src="{{ url_for('static', filename='img/class1.jpg') }}" alt="ed" style="width:100%">
+                <div class="container">
+                    <h2>Ed</h2>
+                    <p class="title">Student Support</p>
+                    <p>Some text that describes me lorem ipsum ipsum lorem.</p>
+                    <p>ed@rocks.com</p>
+                    <p><button class="button">DO NOT Contact</button></p>
+                </div>
+                </div>
             </div>
+            
+            <div class="column">
+                <div class="card">
+                <img src="{{ url_for('static', filename='img/class2.jpg') }}" alt="stefan" style="width:100%">
+                <div class="container">
+                    <h2>Stefan</h2>
+                    <p class="title">Student Tank</p>
+                    <p>Some text that describes me lorem ipsum ipsum lorem.</p>
+                    <p>stefan@rocks.com</p>
+                    <p><button class="button">DO NOT Contact</button></p>
+                </div>
+                </div>
             </div>
         </div>
-        
-        <div class="column">
-            <div class="card">
-            <img src="{{ url_for('static', filename='img/class2.jpg') }}" alt="stefan" style="width:100%">
-            <div class="container">
-                <h2>Stefan</h2>
-                <p class="title">Student Tank</p>
-                <p>Some text that describes me lorem ipsum ipsum lorem.</p>
-                <p>stefan@rocks.com</p>
-                <p><button class="button">DO NOT Contact</button></p>
-            </div>
-            </div>
-        </div>
-        </div>
+    </div>
 
     
 </body>

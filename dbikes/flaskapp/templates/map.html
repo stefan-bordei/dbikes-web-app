@@ -16,38 +16,44 @@
     
 </head>
 <body>
-     <div class="nav">
-	    <a href="{{ url_for('home') }}">Home</a>
-        <a class='active' href="{{ url_for('mapbikes') }}">Map</a>
-        <a href="{{ url_for('plan') }}">Plan your trips</a>
-        <a href="{{ url_for('about') }}">About us</a>
-        <a href="{{ url_for('contacts') }}">Contact us</a>
+    <input type="hidden" id="bycicleGreen" value="{{url_for('static', filename='img/green.png')}}" />
+    <input type="hidden" id="bycicleRed" value="{{url_for('static', filename='img/red.png')}}" />
+    <input type="hidden" id="bycicleYel" value="{{url_for('static', filename='img/yel.png')}}" />
+    <div class="main-header">
+        <div class="nav main-nav">
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a class='active' href="{{ url_for('mapbikes') }}">Map</a></li>
+                <li><a href="{{ url_for('plan') }}">Plan your trips</a></li>
+                <li><a href="{{ url_for('about') }}">About us</a></li>
+                <li><a href="{{ url_for('contacts') }}">Contact us</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="main-body">
+      <div class="dd">
+            <! -- THIS CREATES THE DROPDOWN MENU -->
+            <select id = "dropdown" onchange="stationDropDown(this)">
+                <option>Select a station</option>
+            </select>
+        </div>
+        <div id="map"></div>
+        <div class="details">
+            <div id="stationsTable"></div>
+            <div id="pieChart"></div>
+            <div id="ChartsDay">
+                <canvas id="dailyChart"></canvas>
+            </div>
+            <div id="ChartsWeek">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/map.js') }}"></script>
         
-         <! -- THIS CREATES THE DROPDOWN MENU -->
-        <select id = "dropdown" onchange="dropDown(this)">
-         <option>Select a station</option>
-         </select>
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key={{apiKey}}&callback=initMap&libraries=&v=weekly"
+        async
+        ></script>
     </div>
-    
-    <div id="map"></div>
-    <div id="stationsTable"></div>
-    <div id="chart"></div>
-    <div id="Charts">
-        <canvas id="dailyChart"></canvas>
-        <canvas id="weeklyChart"></canvas>
-    </div>
-    
-   
-    
-   <input type="hidden" id="bycicleGreen" value="{{url_for('static', filename='img/green.png')}}" />
-   <input type="hidden" id="bycicleRed" value="{{url_for('static', filename='img/red.png')}}" />
-   <input type="hidden" id="bycicleYel" value="{{url_for('static', filename='img/yel.png')}}" />
-   
-    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
-    
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key={{apiKey}}&callback=initMap&libraries=&v=weekly"
-    async
-    ></script>
 </body>
 </html>

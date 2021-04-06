@@ -37,6 +37,20 @@ def mapbikes():
 def contacts():
     return render_template("contacts.html")
 
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+
+    if request.method == "POST":
+
+        req = request.form
+        print(req)
+
+        return redirect(request.url)
+
+    return render_template("contacts.html")
+
+
+
 @app.route("/stations")
 def stations():
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)

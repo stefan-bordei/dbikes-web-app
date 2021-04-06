@@ -1,11 +1,18 @@
-
-#map { 
-height: 45%; 
-width :95%; 
-margin-left:auto; 
-margin-right:auto;
+#map_wrapper{
+    position: relative;
+    height: 60%;
+    width: 100%;
 }
 
+#map { 
+height: 100%; 
+width :100%; 
+margin-left:auto; 
+margin-right:auto;
+    display: block;
+}
+
+/*
 #stationsTable {
     height: auto;
     width: 50%;
@@ -14,15 +21,28 @@ margin-right:auto;
     margin: auto;
     text-align: center;
 }
+*/
 
-#Charts, chart {
-    height: auto;
+#stationsTable{
+    position:absolute;
+    top:10%;
+    background-color: rgba(255,255,255,.9);
+    width: 20%;
+    height: 60%;
+    left: 1%;
+    font-size: 3 vw 3vh;
+    font-family: Tahoma, sans-serif;
+
+}
+
+#daychart_wrapper{
+    float:left;
     width: 50%;
-    display: block;
-    float: none;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
+}
+
+#weekchart_wrapper{
+    float:right;
+    width: 50%;
 }
 
 

@@ -2,6 +2,7 @@
 var markers = [];
 var availableMarkers = [];
 
+/*
 // Load the Visualization API and the corechart package.
 google.charts.load('current', {'packages':['corechart']});
 
@@ -18,8 +19,13 @@ let weeklyChart = document.getElementById("weeklyChart").getContext("2d");
 let weekChart= new Chart(dailyChart,{
     type:"line",
 });
-
+*/
 let map;
+
+function infoHider(){
+    let hidden_div=document.getElementById("stationsTable")
+    hidden_div.removeAttribute("hidden")
+}
 
 function initMap() {
     
@@ -108,8 +114,9 @@ function initMap() {
                 infoWindow.setContent("<h2>" + marker.getTitle() + "</h2>");
                 infoWindow.open(marker.getMap(), marker);
 
-                drawChart(station, station.AvailableBikes, station.AvailableBikeStands);
+                //drawChart(station, station.AvailableBikes, station.AvailableBikeStands);
                 buttonPrediction(station.Number, station.Name);
+                infoHider();
             });
           
             
@@ -124,7 +131,7 @@ function stationsDropDown(selectObject) {
     const targetMarker = markers[targetMarkerIndex];
     google.maps.event.trigger(marker, "click");
 }
-
+/*
 // draw the PIE Chart    
 function drawChart(station, bikes, bstands) {
     if (!station) {return false;}
@@ -149,6 +156,7 @@ function drawChart(station, bikes, bstands) {
     var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
     chart.draw(chartData, options);
 }
+*/
 
 // Functions that return the json data of calling the queries. Uses promises to allow for async operation (else the charts wouldnt be made correctly in time)
 function json_getter_week(){
@@ -207,6 +215,52 @@ function varSender(number){
 // Button functionality
 async function buttonPrediction(station_number,station_name){
     varSender(station_number);
+    
+    if (window.dayChart){
+        console.log("Deleting old charts")
+        window.dayChart.destroy();
+        window.weekChart.destroy();
+    }
+    
+    window.dailyChart=new Chart(dailyChart,{
+        type:"doughnut",
+        data:{
+            labels:["Loading"],
+            datasets:[{
+                data:[5],
+                backgroundColor:"#9bc3ca"
+            }]
+        },
+        options:{
+            tooltips:{enabled:false},
+            hover: {mode:null},
+            animation:{
+                animateRotate:true,
+                
+            }
+        }
+    }
+            );
+    
+     window.weeklyChart=new Chart(weeklyChart,{
+        type:"doughnut",
+        data:{
+            labels:["Loading"],
+            datasets:[{
+                data:[5],
+                backgroundColor:"#9bc3ca"
+            }]
+        },
+        options:{
+            tooltips:{enabled:false},
+            hover: {mode:null},
+            animation:{
+                animateRotate:true,
+                
+            }
+        }
+    }
+            );
     // empty arrays to save the individual variables to for chart purposes
     var daytimes = [];
     var dayAvailBike = [];
@@ -239,42 +293,61 @@ async function buttonPrediction(station_number,station_name){
         window.weekChart.destroy();
     }
         
-    // Line data for bikes
-    var dataOne={
-        label:"Free bikes",
-        data:dayAvailBike,
-    };
-    // line data for stands
-    var dataTwo={
-        label:"Free Stands",
-        data:dayAvailStands
-    }
-    
-    // Same data but for the weeks
-    var dataThree={
-        label:"Free Bikes",
-        data:weekAvailBikes,
-    }
-    var dataFour={
-        label:"Free Stands",
-        data:weekAvailStands
-    }
-    // create the charts
-    window.dailyChart= new Chart(dailyChart,{
+   window.dailyChart= new Chart(dailyChart,{
         type:"line",
         data:{
             labels:daytimes,
-            datasets:[dataOne,dataTwo]
+            datasets:[{
+                label:"Free bikes",
+                data:dayAvailBike,
+                borderColor:"#4f8c96",
+               backgroundColor:"#9bc3ca"
+                
+            },{
+                label:"Free Stands",
+                data:dayAvailStands,
+                borderColor:"#006c7f",
+                backgroundColor:"#b3f4ff"
+            }]
         },
+         options:{
+             plugins:{
+                 title:{
+                     display: true,
+                     text: "Past 24 hours"
+                 }
+             }
+         }
     });
-        
-    window.weeklyChart =new Chart(weeklyChart,{
+
+    
+        window.weeklyChart =new Chart(weeklyChart,{
         type:"line",
         data:{
             labels:weekTimes,
-            datasets:[dataThree,dataFour]
-        }
-    });
+            datasets:[{
+                label:"Free bikes",
+                data:weekAvailBikes,
+                borderColor:"#4f8c96",
+               backgroundColor:"#9bc3ca"
+                
+            },{
+                label:"Free Stands",
+                data:weekAvailStands,
+                borderColor:"#006c7f",
+                backgroundColor:"#b3f4ff"
+            }]
+    },
+            options:{
+             plugins:{
+                 title:{
+                     display: true,
+                     text: "Past 7 days"
+                 }
+             }
+         }
+    
+    });;
 };
     
 function dayConverter(day_number){

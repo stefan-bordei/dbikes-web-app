@@ -37,16 +37,17 @@
                 <option>Select a station</option>
             </select>
         </div>
-        <div id="map"></div>
-        <div class="details">
-            <div id="stationsTable"></div>
-            <div id="pieChart"></div>
-            <div id="ChartsDay">
-                <canvas id="dailyChart"></canvas>
-            </div>
-            <div id="ChartsWeek">
-                <canvas id="weeklyChart"></canvas>
-            </div>
+        <div id="map_wrapper">
+            <div id="map"></div>
+            <div hidden id="stationsTable"></div>
+        </div>
+        <div id="daychart_wrapper">
+            <canvas id="dailyChart"></canvas>
+        </div>
+        <div id="weekchart_wrapper">
+        <canvas id="weeklyChart"></canvas>
+        </div>
+    
         </div>
         <script src="{{ url_for('static', filename='js/map.js') }}"></script>
         
@@ -54,6 +55,5 @@
             src="https://maps.googleapis.com/maps/api/js?key={{apiKey}}&callback=initMap&libraries=&v=weekly"
         async
         ></script>
-    </div>
 </body>
 </html>

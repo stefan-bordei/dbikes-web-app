@@ -80,14 +80,18 @@ function initMap() {
             option.value = station.Number;
             dropdown.appendChild(option);
             
+              
             option.addEventListener("click", () => {
-                
+                google.maps.event.trigger(marker, "click");
                 console.log("CLICKED!!" + option.text);
-            });
+            }); 
+            
             
             marker.setMap(map);
             markers.push(marker);
             if (station.AvailableBikes > 1) { availableMarkers.push(marker); }
+            
+            option.setAttribute("data-station", markers.length - 1);
             
             marker.addListener("click", () => {
                 var showDetails = document.getElementById("stationsTable");
@@ -107,46 +111,20 @@ function initMap() {
                 drawChart(station, station.AvailableBikes, station.AvailableBikeStands);
                 buttonPrediction(station.Number, station.Name);
             });
+          
+            
         });
     }).catch(err => {
         console.log("OOPS!", err);
     });
 }
 
-function dropDown(selectObject){
-        //testing logs
-        console.log("DROPDOWN FUNCTION")
-        console.log(selectObject.value)
-        
-        // Fetch the stations
-        fetch("/stations").then(response =>{
-            return response.json();
-        }).then(data=> {
-            console.log("DROPDOWN",data)
-            data.forEach(station => {
-                //if the station number matches
-                if(station.Number == selectObject.value){
-                    // Populate the data the same way the marker click does
-                    var showDetails = document.getElementById("stationsTable");
-                    showDetails.innerHTML =   "<h1>Number:" + station.Number +
-                                                "</h1><h1>Name: " + station.Name +
-                                                "</h1><h1>BikeStands: " + station.BikeStands + 
-                                                "</h1><p>Available Bikes:" + station.AvailableBikes + 
-                                                "</p><p>Available Stands:" + station.AvailableBikeStands + 
-                                                "</p>";
-                    
-                    drawChart(station,station.AvailableBikes,station.AvailableBikeStands);
-                    console.log("DROPDOWN VARIABLES",station.Number,station.Name)
-                    buttonPrediction(station.Number, station.Name);
-                
-                }
-            })
-        }).catch(err => {
-            console.log("WHY GOD WHY",err)
-        });
-            
+function stationsDropDown(selectObject) {
+    const targetMarkerIndex = selectObject.selected.getAttribute("data-station");
+    const targetMarker = markers[targetMarkerIndex];
+    google.maps.event.trigger(marker, "click");
 }
-    
+
 // draw the PIE Chart    
 function drawChart(station, bikes, bstands) {
     if (!station) {return false;}
@@ -161,14 +139,14 @@ function drawChart(station, bikes, bstands) {
     ]);
 
     // Set chart options
-    var options = {'title':'Available Bikes vs Stands',
+    var options = {
                 'width':'100%',
-                'height':500,
+                'height':'500',
                 'margin-left': 'auto',
                 'margin-right': 'auto',};
 
     // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.PieChart(document.getElementById('chart'));
+    var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
     chart.draw(chartData, options);
 }
 

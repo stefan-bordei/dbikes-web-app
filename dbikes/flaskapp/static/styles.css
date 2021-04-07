@@ -2,6 +2,46 @@
     box-sizing: border-box;
 }
 
+#map_wrapper{
+    position: relative;
+    height: 60%;
+    width: 100%;
+}
+
+#map { 
+height: 100%; 
+width :100%; 
+margin-left:auto; 
+margin-right:auto;
+    display: block;
+}
+
+
+
+#stationsTable{
+    position:absolute;
+    top:10%;
+    background-color: rgba(255,255,255,.9);
+    width: 20%;
+    height: 60%;
+    left: 1%;
+    font-size: 3 vw 3vh;
+    font-family: Tahoma, sans-serif;
+
+}
+
+#daychart_wrapper{
+    float:left;
+    width: 50%;
+}
+
+#weekchart_wrapper{
+    float:right;
+    width: 50%;
+}
+
+
+
 html, body {
     height: 100%;
     margin: 0;
@@ -59,7 +99,7 @@ html, body {
     padding: 0 1.5em;
     height: 100%;
 }
-
+/*
 #map { 
     height: 65%;
     width: 85%;
@@ -67,7 +107,7 @@ html, body {
     margin-left: auto;
     margin-top: 20px;
 }
-
+*/
 .dd {
     display: block;
     padding: 5px;
@@ -101,6 +141,7 @@ html, body {
  
 }
 
+/*
 #ChartsDay {
     grid-column-start: 2;
     grid-column-end: 2;
@@ -115,7 +156,7 @@ html, body {
     grid-row-end: 2;
     width: 60%;
 }
-
+*/
 
 .hero-image {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0.5, 0.1)), url(/static/img/bner.jpg);

@@ -4,7 +4,11 @@ import json
 import dbinfo
 import pandas as pd
 import datetime
+import pickle
 from datetime import timedelta
+
+pickle_in = open("dict.pickle","rb")
+regression_models = pickle.load(pickle_in)
 
 
 app = Flask(__name__)

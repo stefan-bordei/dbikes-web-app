@@ -33,13 +33,16 @@
     <div class="main-body">
       <div class="dd">
             <! -- THIS CREATES THE DROPDOWN MENU -->
-            <select id = "dropdown" onchange="stationDropDown(this)">
+            <select id = "dropdown" onchange="stationsDropDown(this)">
                 <option>Select a station</option>
             </select>
         </div>
         <div id="map_wrapper">
             <div id="map"></div>
-            <div hidden id="stationsTable"></div>
+            <div hidden id="stationsTable">
+            <div id = "pieChart">
+                </div>
+            </div>
         </div>
         <div id="daychart_wrapper">
             <canvas id="dailyChart"></canvas>

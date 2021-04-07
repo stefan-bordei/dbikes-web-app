@@ -8,24 +8,36 @@ google.charts.load('current', {'packages':['corechart']});
 
 // Set a callback to run when the Google Visualization API is loaded.
 google.charts.setOnLoadCallback(drawChart);
-
-
-let dailyChart = document.getElementById("dailyChart").getContext("2d");
-let dayChart= new Chart(dailyChart,{
-    type:"line",
-});
-
-let weeklyChart = document.getElementById("weeklyChart").getContext("2d");
-let weekChart= new Chart(dailyChart,{
-    type:"line",
-});
 */
+
+
 let map;
 
 function infoHider(){
     let hidden_div=document.getElementById("stationsTable")
     hidden_div.removeAttribute("hidden")
 }
+
+//Behold chart eater, destroyer of charts, conquerer of systems (i need coffee)
+/*
+function chartEater(){
+    console.log("NOM NOM NOM")
+    window.dailyChart.destroy();
+    window.weeklyChart.destroy();
+
+    var daycanvas= document.createElement("canvas");
+    daycanvas.setAttribute("id","dailyChart");
+    
+    var weekcanvas= document.createElement("canvas");
+    daycanvas.setAttribute("id","weeklyChart")
+    
+    
+    document.getElementById("daychart_wrapper").appendChild(daycanvas);
+    document.getElementById("weekchart_wrapper").appendChild(weekcanvas);
+    */
+    
+//}
+
 
 function initMap() {
     
@@ -131,9 +143,11 @@ function stationsDropDown(selectObject) {
     const targetMarker = markers[targetMarkerIndex];
     google.maps.event.trigger(marker, "click");
 }
+
 /*
 // draw the PIE Chart    
 function drawChart(station, bikes, bstands) {
+    console.log("Printing chart")
     if (!station) {return false;}
     
     // Create the data table.
@@ -151,7 +165,7 @@ function drawChart(station, bikes, bstands) {
                 'height':'500',
                 'margin-left': 'auto',
                 'margin-right': 'auto',};
-
+          
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
     chart.draw(chartData, options);
@@ -216,13 +230,12 @@ function varSender(number){
 async function buttonPrediction(station_number,station_name){
     varSender(station_number);
     
-    if (window.dayChart){
-        console.log("Deleting old charts")
-        window.dayChart.destroy();
-        window.weekChart.destroy();
-    }
+    let dailyLoad=document.getElementById("dailyChart").getContext("2d")
     
-    window.dailyChart=new Chart(dailyChart,{
+   let weeklyLoad=document.getElementById("weeklyChart").getContext("2d")
+    
+    
+    let dayload=new Chart(dailyLoad,{
         type:"doughnut",
         data:{
             labels:["Loading"],
@@ -242,7 +255,7 @@ async function buttonPrediction(station_number,station_name){
     }
             );
     
-     window.weeklyChart=new Chart(weeklyChart,{
+     let weekload=new Chart(weeklyLoad,{
         type:"doughnut",
         data:{
             labels:["Loading"],
@@ -288,12 +301,17 @@ async function buttonPrediction(station_number,station_name){
     
     
     // this destroys any previous charts (Got buggy once you tried a few times, old ones would pop in and out)
-    if (window.dayChart){
-        window.dayChart.destroy();
-        window.weekChart.destroy();
-    }
+    
+    dayload.destroy();
+    weekload.destroy();
         
-   window.dailyChart= new Chart(dailyChart,{
+    let dailyChart=document.getElementById("dailyChart")
+    dailyChart.getContext("2d")
+    
+    let weeklyChart=document.getElementById("weeklyChart")
+    weeklyChart.getContext("2d")
+    
+   let daychart= new Chart(dailyChart,{
         type:"line",
         data:{
             labels:daytimes,
@@ -321,7 +339,7 @@ async function buttonPrediction(station_number,station_name){
     });
 
     
-        window.weeklyChart =new Chart(weeklyChart,{
+    let weekChart =new Chart(weeklyChart,{
         type:"line",
         data:{
             labels:weekTimes,

@@ -1,5 +1,17 @@
 from flask import Flask, render_template, request,session,redirect,url_for
 from sqlalchemy import create_engine
+from sqlalchemy import *
+from sqlalchemy.ext.declarative import declarative_base, ConcreteBase
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import *
+from sqlalchemy import exc
+from datetime import datetime, timedelta
+from random import randint
+import logging
+import requests
+import datetime
+import time
+import os
 import json
 import dbinfo
 import pandas as pd
@@ -17,6 +29,44 @@ DB_PASS = dbinfo.DB_DBIKES_PASS
 DB_HOST = dbinfo.DB_DBIKES
 GM_KEY = dbinfo.GMAPS_KEY
 
+Base = declarative_base()
+
+def map_customer_query_data(obj):        
+    """
+        Function to return a dictionary mapped from obj.
+        Used for the weather table.
+    """
+    return {
+             'FirstName' : obj['firstname'],
+             'LastName' : obj['lastname'],
+             'EmailAddress' : obj['emailAddress'],
+             'Country' : obj['country'],
+             'Subject' : obj['subject'],
+             'RecievedAt' : datetime.datetime.now()}
+
+class CustomerQueries(Base):
+    """
+        class constructor for the customer_query table.
+    """
+
+    __tablename__ = "customer_query"
+    id = Column(Integer, primary_key=True)
+    FirstName = Column(String(128))
+    LastName = Column(String(128))
+    EmailAddress = Column(String(128))
+    Country = Column(String(128))
+    Subject = Column(String(128))
+    RecievedAt = Column(DateTime)
+
+    def __repr__(self):
+        """
+            Prints the values instead of the memory pointer.
+        """
+        
+        return "<Node(Id='%s', Number='%s', Status='%s', AvailableBikeStands='%s', BikeStands='%s', LastUpdate='%s')>" \
+                % (self.Id, self.Number, self.Status, self.AvailableBikeStands, self.BikeStands, self.LastUpdate)
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -33,22 +83,22 @@ def about():
 def mapbikes():
     return render_template("map.html", apiKey = GM_KEY)
 
-@app.route("/contacts")
+@app.route("/contacts",methods=["GET","POST"])
 def contacts():
-    return render_template("contacts.html")
-
-@app.route("/contact", methods=["GET", "POST"])
-def contact():
-
     if request.method == "POST":
+        engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+        CustomerQueries.__table__.create(bind=engine, checkfirst=True)
+        Session = sessionmaker(bind=engine)
+        session = Session()
 
         req = request.form
-        print(req)
+        session.add(CustomerQueries(**map_customer_query_data(request.form)))
+        session.commit()
+        print(f"mail: {req['emailAddress']}\nsubject: {req['subject']}")
 
         return redirect(request.url)
 
     return render_template("contacts.html")
-
 
 
 @app.route("/stations")
@@ -76,8 +126,6 @@ def varGet():
 def buttonFunction():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
-    #dateDiff = (datetime.datetime.now() - datetime.timedelta(7)).timestamp()
-    #dateDiff = datetime.timedelta(7).timestamp()
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE dynamic_stations.LastUpdate > DATE(NOW()) - INTERVAL 6 DAY AND Number = {number} GROUP BY DAY (dynamic_stations.LastUpdate) ORDER BY DAY(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 

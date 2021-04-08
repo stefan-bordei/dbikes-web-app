@@ -22,7 +22,7 @@ regression_models = pickle.load(pickle_in)
 import dbinfo
 import pandas as pd
 import datetime
-from datetime import timedelta
+from datetime import timedelta,datetime
 
 
 app = Flask(__name__)
@@ -141,7 +141,7 @@ def buttonFunction():
 def buttonFunctionDay():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
-    dateDiff = (datetime.datetime.now() - timedelta(1)).timestamp()
+    dateDiff = (datetime.now() - timedelta(1)).timestamp()
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY HOUR (dynamic_stations.LastUpdate) ORDER BY HOUR(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
@@ -189,16 +189,17 @@ def predSend():
                     rain=True
 
     print("DID JSON")
-    d={"Hour":hour,"Temperature":(temp-273.15),"Rain":rain,"isWeekDay":weekday}
+    if temp >100:
+        temp-=273.15
+    d={"Hour":hour,"Temperature":temp,"Rain":rain,"isWeekDay":weekday}
     data=pd.DataFrame(d,index=[0])
-
     print("DATAFRAME MADE")
     print(data)
     print(data.shape)
     print(data.dtypes)
     prediction=regression_models[int(number)]
 
-    print(prediction.predict(data))
+    return str(prediction.predict(data)[0])
 
 
 

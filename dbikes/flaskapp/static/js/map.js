@@ -22,7 +22,29 @@ function infoHider(){
     hidden_cal.removeAttribute("hidden")
 }
 
-function predictSender(number){
+function predictGetter(){
+    return new Promise((resolve,reject) => {
+            fetch("/predSender").then(
+            function(response){
+                console.log(response)
+                if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                    }
+            response.json().then(function(data){
+                console.log("Prediction",data)
+                //return data;
+                resolve(data)
+            });
+            });
+    })
+
+}
+
+
+
+
+async function predictSender(number,totalStands){
     console.log("PREDICT BUTTON")
     var date=document.getElementById("timePicker").value
 
@@ -30,6 +52,8 @@ function predictSender(number){
 
     console.log("date",date)
     console.log("number",number)
+    
+    let pred_number
 
     $.ajax({
         type: 'POST',
@@ -38,29 +62,23 @@ function predictSender(number){
         dataType: 'json',
         data: JSON.stringify({number,date}),
     });
-
-
+    
+    pred_number = await predictGetter()
+    pred_number= parseFloat(pred_number)
+    
+    var message=document.getElementById("Message")
+    console.log("TOTAL STANDS",totalStands,typeof totalStands)
+    console.log("PRED NUM",pred_number,typeof pred_number)
+    console.log("PERCENTAGE",pred_number/totalStands)
+    if (pred_number/totalStands < .3){
+        message.innerHTML="Poor Availability"
+    }else if (pred_number/totalStands > .3 && pred_number/totalStands <.6){
+        message.innerHTML="Good Availability"
+    }else if (pred_number/totalStands >.6) {
+        message.innerHTML="Great Availability"
+    }
+    
 };
-
-//Behold chart eater, destroyer of charts, conquerer of systems (i need coffee)
-/*
-function chartEater(){
-    console.log("NOM NOM NOM")
-    window.dailyChart.destroy();
-    window.weeklyChart.destroy();
-
-    var daycanvas= document.createElement("canvas");
-    daycanvas.setAttribute("id","dailyChart");
-    
-    var weekcanvas= document.createElement("canvas");
-    daycanvas.setAttribute("id","weeklyChart")
-    
-    
-    document.getElementById("daychart_wrapper").appendChild(daycanvas);
-    document.getElementById("weekchart_wrapper").appendChild(weekcanvas);
-    */
-    
-//}
 
 
 function initMap() {
@@ -151,10 +169,10 @@ function initMap() {
                 var btn= document.createElement("button")
                 btn.innerHTML="Show me";
                 btn.id=station.Number;
+                let predicted
                 btn.addEventListener("click",function(){
-                    predictSender(station.Number)
+                    predicted = predictSender(station.Number,station.BikeStands)
                 });
-
                 document.getElementById("calander").appendChild(btn);
                 //showDetails.appendChild(btn);
                 var date=new Date();

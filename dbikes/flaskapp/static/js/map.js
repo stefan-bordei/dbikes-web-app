@@ -16,6 +16,9 @@ let map;
 function infoHider(){
     let hidden_div=document.getElementById("stationsTable")
     hidden_div.removeAttribute("hidden")
+    
+    let hidden_cal=document.getElementById("timePicker")
+    hidden_cal.removeAttribute("hidden")
 }
 
 //Behold chart eater, destroyer of charts, conquerer of systems (i need coffee)
@@ -38,6 +41,25 @@ function chartEater(){
     
 //}
 
+function predictSender(number){
+    console.log("PREDICT BUTTON")
+    var date=document.getElementById("timePicker").value
+    
+    console.log("HERE",typeof date)
+    
+    console.log("date",date)
+    console.log("number",number)
+    
+    $.ajax({
+        type: 'POST',
+        url: '/predGetter',
+        contentType: 'application/json;charset=UTF-8',
+        dataType: 'json',
+        data: JSON.stringify({number,date}),
+    });
+    
+    
+};
 
 function initMap() {
     
@@ -83,7 +105,7 @@ function initMap() {
             }else if (station.AvailableBikes <= 5){
                 iconColor = bikered;
             }
-            
+
             const marker = new google.maps.Marker({
                 title: station.Name,
                 position: { lat: station.PosLat, lng: station.PosLng },
@@ -113,13 +135,38 @@ function initMap() {
             
             marker.addListener("click", () => {
                 var showDetails = document.getElementById("stationsTable");
-                showDetails.innerHTML =   "<h1>Number:" + station.Number +
+                var contents= showDetails.innerHTML;
+                showDetails.innerHTML="";
+                 
+                showDetails.innerHTML =   "<h1 class='Number'>Number:" + station.Number +
                                             "</h1><h1>Name: " + station.Name +
                                             "</h1><h1>BikeStands: " + station.BikeStands + 
                                             "</h1><p>Available Bikes:" + station.AvailableBikes + 
                                             "</p><p>Available Stands:" + station.AvailableBikeStands + 
-                                            "</p>";
-                                            
+                                            "</p>"+
+                                            contents;
+                var btn= document.createElement("button")
+                btn.innerHTML="Show me";
+                btn.id=station.Number;
+                btn.addEventListener("click",function(){
+                    predictSender(station.Number)
+                });
+                
+                document.getElementById("calander").appendChild(btn);
+                //showDetails.appendChild(btn);
+                var date=new Date();
+                date.setSeconds(0,0);
+                date.setMilliseconds(0,0);
+                date.setMinutes(0,0);
+                
+                var now = new Date();
+                now.setSeconds(0,0);
+                now.setMilliseconds(0,0);
+                now.setMinutes(0,0);
+                
+                date.setDate(date.getDate()+7)
+                document.getElementById("timePicker").max=date.toISOString().split(".")[0];
+                document.getElementById("timePicker").min=now.toISOString().split(".")[0];
                 // Generate infoWindow with station Name and make it dissapear 
                 // when clicking on another marker
                 infoWindow.close();
@@ -139,9 +186,11 @@ function initMap() {
 }
 
 function stationsDropDown(selectObject) {
-    const targetMarkerIndex = selectObject.selected.getAttribute("data-station");
-    const targetMarker = markers[targetMarkerIndex];
-    google.maps.event.trigger(marker, "click");
+    if(selectObject && selectObject.selected){
+        const targetMarkerIndex = selectObject.getAttribute("data-station");
+        const targetMarker = markers[targetMarkerIndex];
+        google.maps.event.trigger(targetMarker, "click");
+    }
 }
 
 /*
@@ -225,6 +274,8 @@ function varSender(number){
     // event.preventDefault();
         
 }
+
+
 
 // Button functionality
 async function buttonPrediction(station_number,station_name){

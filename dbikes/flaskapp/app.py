@@ -48,7 +48,7 @@ def map_customer_query_data(obj):
              'EmailAddress' : obj['emailAddress'],
              'Country' : obj['country'],
              'Subject' : obj['subject'],
-             'RecievedAt' : datetime.datetime.now()}
+             'RecievedAt' : datetime.now()}
 
 class CustomerQueries(Base):
     """

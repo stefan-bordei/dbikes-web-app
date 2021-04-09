@@ -16,27 +16,69 @@ let map;
 function infoHider(){
     let hidden_div=document.getElementById("stationsTable")
     hidden_div.removeAttribute("hidden")
+    
+    
+    let hidden_cal=document.getElementById("timePicker")
+    hidden_cal.removeAttribute("hidden")
 }
 
-//Behold chart eater, destroyer of charts, conquerer of systems (i need coffee)
-/*
-function chartEater(){
-    console.log("NOM NOM NOM")
-    window.dailyChart.destroy();
-    window.weeklyChart.destroy();
+function predictGetter(){
+    return new Promise((resolve,reject) => {
+            fetch("/predSender").then(
+            function(response){
+                console.log(response)
+                if (response.status !== 200){
+                    console.log("Somethings gone horribly wrong. Status code: " +response.status);
+                    return;
+                    }
+            response.json().then(function(data){
+                console.log("Prediction",data)
+                //return data;
+                resolve(data)
+            });
+            });
+    })
 
-    var daycanvas= document.createElement("canvas");
-    daycanvas.setAttribute("id","dailyChart");
+}
+
+
+
+
+async function predictSender(number,totalStands){
+    console.log("PREDICT BUTTON")
+    var date=document.getElementById("timePicker").value
+
+    console.log("HERE",typeof date)
+
+    console.log("date",date)
+    console.log("number",number)
     
-    var weekcanvas= document.createElement("canvas");
-    daycanvas.setAttribute("id","weeklyChart")
+    let pred_number
+
+    $.ajax({
+        type: 'POST',
+        url: '/predGetter',
+        contentType: 'application/json;charset=UTF-8',
+        dataType: 'json',
+        data: JSON.stringify({number,date}),
+    });
     
+    pred_number = await predictGetter()
+    pred_number= parseFloat(pred_number)
     
-    document.getElementById("daychart_wrapper").appendChild(daycanvas);
-    document.getElementById("weekchart_wrapper").appendChild(weekcanvas);
-    */
+    var message=document.getElementById("Message")
+    console.log("TOTAL STANDS",totalStands,typeof totalStands)
+    console.log("PRED NUM",pred_number,typeof pred_number)
+    console.log("PERCENTAGE",pred_number/totalStands)
+    if (pred_number/totalStands < .3){
+        message.innerHTML="Poor Availability"
+    }else if (pred_number/totalStands > .3 && pred_number/totalStands <.6){
+        message.innerHTML="Good Availability"
+    }else if (pred_number/totalStands >.6) {
+        message.innerHTML="Great Availability"
+    }
     
-//}
+};
 
 
 function initMap() {
@@ -113,13 +155,39 @@ function initMap() {
             
             marker.addListener("click", () => {
                 var showDetails = document.getElementById("stationsTable");
-                showDetails.innerHTML =   "<h1>Number:" + station.Number +
+                var contents= showDetails.innerHTML;
+                showDetails.innerHTML="";
+
+                showDetails.innerHTML =   "<h1 class='Number'>Number:" + station.Number +
                                             "</h1><h1>Name: " + station.Name +
                                             "</h1><h1>BikeStands: " + station.BikeStands + 
                                             "</h1><p>Available Bikes:" + station.AvailableBikes + 
                                             "</p><p>Available Stands:" + station.AvailableBikeStands + 
-                                            "</p>";
-                                            
+                                            "</p>"+
+                                            contents;
+                
+                var btn= document.createElement("button")
+                btn.innerHTML="Show me";
+                btn.id=station.Number;
+                let predicted
+                btn.addEventListener("click",function(){
+                    predicted = predictSender(station.Number,station.BikeStands)
+                });
+                document.getElementById("calander").appendChild(btn);
+                //showDetails.appendChild(btn);
+                var date=new Date();
+                date.setSeconds(0,0);
+                date.setMilliseconds(0,0);
+                date.setMinutes(0,0);
+
+                var now = new Date();
+                now.setSeconds(0,0);
+                now.setMilliseconds(0,0);
+                now.setMinutes(0,0);
+
+                date.setDate(date.getDate()+7)
+                document.getElementById("timePicker").max=date.toISOString().split(".")[0];
+                document.getElementById("timePicker").min=now.toISOString().split(".")[0];                            
                 // Generate infoWindow with station Name and make it dissapear 
                 // when clicking on another marker
                 infoWindow.close();
@@ -142,6 +210,12 @@ function stationsDropDown(selectObject) {
     const targetMarkerIndex = selectObject.selected.getAttribute("data-station");
     const targetMarker = markers[targetMarkerIndex];
     google.maps.event.trigger(marker, "click");
+    
+    if(selectObject && selectObject.selected){
+        const targetMarkerIndex = selectObject.getAttribute("data-station");
+        const targetMarker = markers[targetMarkerIndex];
+        google.maps.event.trigger(targetMarker, "click");
+    }
 }
 
 /*

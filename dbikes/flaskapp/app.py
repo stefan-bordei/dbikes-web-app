@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request,session,redirect,url_for
 from sqlalchemy import create_engine
 from sqlalchemy import *
+
 from sqlalchemy.ext.declarative import declarative_base, ConcreteBase
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import *
@@ -12,11 +13,16 @@ import requests
 import datetime
 import time
 import os
-import json
+import json,requests
+import pickle
+
+import json,requests
+pickle_in = open("dict.pickle","rb")
+regression_models = pickle.load(pickle_in)
 import dbinfo
 import pandas as pd
 import datetime
-from datetime import timedelta
+from datetime import timedelta,datetime
 
 
 app = Flask(__name__)
@@ -42,7 +48,7 @@ def map_customer_query_data(obj):
              'EmailAddress' : obj['emailAddress'],
              'Country' : obj['country'],
              'Subject' : obj['subject'],
-             'RecievedAt' : datetime.datetime.now()}
+             'RecievedAt' : datetime.now()}
 
 class CustomerQueries(Base):
     """
@@ -135,9 +141,68 @@ def buttonFunction():
 def buttonFunctionDay():
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
-    dateDiff = (datetime.datetime.now() - datetime.timedelta(1)).timestamp()
+    dateDiff = (datetime.now() - timedelta(1)).timestamp()
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY HOUR (dynamic_stations.LastUpdate) ORDER BY HOUR(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
+
+
+@app.route("/predGetter",methods=["GET","POST"])
+def predGet():
+    if request.method == "POST":
+        print("AAAAAAAAAAAAAAAAAAAAAAAh")
+        data = request.get_json()
+        print(data)
+        session["station_number"] = str(data["number"])
+        session["date"]=str(data["date"])
+        return redirect(url_for("predSend"))
+
+
+@app.route("/predSender",methods=["GET","POST"])
+def predSend():
+    number= session.get("station_number",None)
+    date=session.get("date",None)
+    p = '%Y-%m-%dT%H:%M'
+    weekday = True
+    date =datetime.strptime(date,p)
+    date=date.replace(minute=0)
+    hour=date.hour
+    if date.day > 5:
+        weekday=False
+
+    date=date.timestamp()
+    temp=0
+    humid=0
+    rain=False
+    print("DOWN TO URL")
+    BASE_URL = "http://api.openweathermap.org/data/2.5/forecast?id=2964574&appid=8ae40bdb25ab978b8f3e77a14b91b68d"
+
+    response = requests.get(BASE_URL)
+
+    data = response.json()
+
+    for i in data["list"]:
+        if i["dt"] == date:
+            temp= (i["main"])["temp"]
+            humid =(i["main"])["humidity"]
+            for j in i["weather"]:
+                if "rain" in j["main"]:
+                    rain=True
+
+    print("DID JSON")
+    if temp >100:
+        temp-=273.15
+    d={"Hour":hour,"Temperature":temp,"Rain":rain,"isWeekDay":weekday}
+    data=pd.DataFrame(d,index=[0])
+    print("DATAFRAME MADE")
+    print(data)
+    print(data.shape)
+    print(data.dtypes)
+    prediction=regression_models[int(number)]
+
+    return str(prediction.predict(data)[0])
+
+
+
 
 
 if __name__ == "__main__":

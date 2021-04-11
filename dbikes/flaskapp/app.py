@@ -17,6 +17,7 @@ import json,requests
 import pickle
 
 import json,requests
+#imports the pickle file used for the predictions
 pickle_in = open("dict.pickle","rb")
 regression_models = pickle.load(pickle_in)
 import dbinfo
@@ -121,15 +122,23 @@ def prediction():
 #function that gets the station number from the html webpage and saves it to the session
 @app.route("/varSender",methods=["GET","POST"])
 def varGet():
+    """
+    Function which retrieves a variable from the JS ajax and saves it to a flask variable for later use
+    """
     if request.method == "POST":
         data=request.get_json()
         session["station_number"] = str(data["number"])
+        # redirects to the buttonFunction app route
         return redirect(url_for("buttonFunction"))
 
 
 # Return JSON data with stand information from the past week
 @app.route("/btnFunc")
 def buttonFunction():
+    """
+    function which performs an SQL query to return the weekly historical data for a station where a station number matches the provided number
+    """
+    # sets the number variable to the session variable station_number (which is set from the JS)
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE dynamic_stations.LastUpdate > DATE(NOW()) - INTERVAL 6 DAY AND Number = {number} GROUP BY DAY (dynamic_stations.LastUpdate) ORDER BY DAY(dynamic_stations.LastUpdate)", engine)
@@ -139,66 +148,98 @@ def buttonFunction():
 # Return JSON data with stand information from the past Day
 @app.route("/btnFuncDay")
 def buttonFunctionDay():
+    """
+        function which performs an SQL query to return the  historical data (past 24 hours) for a station where a station number matches the provided number
+        """
     number = session.get("station_number",None)
     engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
-    dateDiff = (datetime.now() - timedelta(1)).timestamp()
+    dateDiff = (datetime.now() - timedelta(1)).timestamp() # gets the epoch time this time 24 hours ago
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY HOUR (dynamic_stations.LastUpdate) ORDER BY HOUR(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
 
 @app.route("/predGetter",methods=["GET","POST"])
 def predGet():
+    """
+    Retrieves the variables from ajax within the javascript and sets them to the Flask variables (to be used in a seperate function)
+    """
     if request.method == "POST":
-        print("AAAAAAAAAAAAAAAAAAAAAAAh")
         data = request.get_json()
         print(data)
         session["station_number"] = str(data["number"])
         session["date"]=str(data["date"])
+        # after setting the variables thi is then routed to the predSend function
         return redirect(url_for("predSend"))
 
 
 @app.route("/predSender",methods=["GET","POST"])
 def predSend():
+    """
+    Function which retrieves the date and number for a prediction, uses the appropriate model and then sends the result back to the webpage
+    """
+
+    # retrieves the session variables (station number and the date for the prediction
     number= session.get("station_number",None)
     date=session.get("date",None)
+    # format for reformatting the retrieved date for the prediction model
     p = '%Y-%m-%dT%H:%M'
+    # set weekday to True
     weekday = True
+    # format the date so it works with the prediction
     date =datetime.strptime(date,p)
+    # remove the minutes
     date=date.replace(minute=0)
+    # retrieve the hour (hour is one of the variables used in the prediction
     hour=date.hour
+    # set the weeday to false if the prediction date day is saturday or sunday
     if date.day > 5:
         weekday=False
 
     date=date.timestamp()
+    # create temp, humidity and rain to 0 0 and False (these are used in the prediction and will be updated)
     temp=0
     humid=0
     rain=False
     print("DOWN TO URL")
+
+    # URl for the weather forecast data
     BASE_URL = "http://api.openweathermap.org/data/2.5/forecast?id=2964574&appid=8ae40bdb25ab978b8f3e77a14b91b68d"
 
     response = requests.get(BASE_URL)
 
     data = response.json()
 
+    # iterate through the JSON file (the forecast weather data)
     for i in data["list"]:
+        # if it is the correct date and time
         if i["dt"] == date:
+            # set the temp and the humidity to the temp and humidity at that time
             temp= (i["main"])["temp"]
             humid =(i["main"])["humidity"]
+            # iterate through the nested weather list
             for j in i["weather"]:
+                # if the weather is rainy (e.g light rain, heavy rain)
                 if "rain" in j["main"]:
+                    # set rain to true
                     rain=True
 
     print("DID JSON")
+    # if the temperature is given in Kelvin convert to celcius (most of the time it is in kelvin but just incase)
     if temp >100:
+        # technically could mess up the temperature if it was over 100 and in celcius but if it ever gets that hot the prediction model being thrown off is the least of our worries
         temp-=273.15
+    # creates a dictionary with the variables needed for the prediction
     d={"Hour":hour,"Temperature":temp,"Rain":rain,"isWeekDay":weekday}
+    # creates a dataframe from that data (prediction model requires a dataframe)
     data=pd.DataFrame(d,index=[0])
     print("DATAFRAME MADE")
     print(data)
     print(data.shape)
     print(data.dtypes)
+    # Uses the prediction model for the station number with the dataframe
     prediction=regression_models[int(number)]
 
+    # returns the predicted free Bike amount
     return str(prediction.predict(data)[0])
 
 

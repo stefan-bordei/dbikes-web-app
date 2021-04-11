@@ -16,22 +16,27 @@ margin-right:auto;
     display: block;
 }
 
-
+/* This applys a white border to the elements of the stationsTable div, this helps with readability */
 #stationsTable > *{
     border:1px solid rgba(255,255,255,1)
 }
 #stationsTable{
+    /* position absolute allows the table to show up infront of the map */
     position:absolute;
     top:10%;
     background-color: rgba(255,255,255,.9);
     width: 20%;
-    height: 50%;
+    height: 70%;
     left: 1%;
+    /* sets the font size to be relative to the container size/ prevents overflow */
     font-size: 3 vw 3vh;
     font-family: Tahoma, sans-serif;
+    /* overflow auto allows the background colour to apply to the nested calander divs */
+    overflow: auto;
 
 }
 
+/* sets the charts to be left and right at the bottom */
 #daychart_wrapper{
     float:left;
     width: 50%;
@@ -43,7 +48,7 @@ margin-right:auto;
 }
 
 #Message {
-    padding-top: 15px;
+    padding-top: 0px;
     font-size:25px;
 }
 
@@ -103,6 +108,9 @@ html, body {
 .main-body {
     margin: 0 auto;
     padding: 0 1.5em;
+    /* padding right and left at 0 allows the map and hero image to cover the screen fully (no white side borers)*/
+    padding-left: 0;
+    padding-right: 0;
     height: 100%;
 }
 /*

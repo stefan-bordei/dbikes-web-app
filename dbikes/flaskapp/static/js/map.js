@@ -13,6 +13,7 @@ google.charts.setOnLoadCallback(drawChart);
 
 let map;
 
+//This function removes the hidden attributes from the map infowindow and its contents
 function infoHider(){
     let hidden_div=document.getElementById("stationsTable")
     hidden_div.removeAttribute("hidden")
@@ -22,8 +23,11 @@ function infoHider(){
     hidden_cal.removeAttribute("hidden")
 }
 
+// This function receives the results of running the prediction model with the given variables
 function predictGetter(){
+    // Returning a promise allows the predictSender function to wait for this function to complete (meaining the function has to wait for a prediction to be made before popualting the table)
     return new Promise((resolve,reject) => {
+        //calls the function in the flask file
             fetch("/predSender").then(
             function(response){
                 console.log(response)
@@ -32,9 +36,9 @@ function predictGetter(){
                     return;
                     }
             response.json().then(function(data){
-                console.log("Prediction",data)
-                //return data;
-                resolve(data)
+                console.log("Prediction",data);
+                //returns the prediction (e.g the predicted amount of free bikes)
+                resolve(data);
             });
             });
     })
@@ -43,18 +47,16 @@ function predictGetter(){
 
 
 
+// This saves the default stationTable contents (the calander and button), this allows them to be added to the stationstable as it is updated without repeating the elements
+var tablediv = document.getElementById("stationsTable");
+var calanderContents= tablediv.innerHTML;
 
+// async Function to return the predicted number of free bikes which is broken down into Poor,Good and Great availability
 async function predictSender(number,totalStands){
-    console.log("PREDICT BUTTON")
+    // retrieves the inputted date (from the calander)
     var date=document.getElementById("timePicker").value
-
-    console.log("HERE",typeof date)
-
-    console.log("date",date)
-    console.log("number",number)
-    
     let pred_number
-
+    // This sends the date and the station number to the Flask app file to be used in the prediction
     $.ajax({
         type: 'POST',
         url: '/predGetter',
@@ -63,18 +65,25 @@ async function predictSender(number,totalStands){
         data: JSON.stringify({number,date}),
     });
     
+    // call the predictGetter function and wait for the result
     pred_number = await predictGetter()
+    // convert to a float
     pred_number= parseFloat(pred_number)
     
     var message=document.getElementById("Message")
+    // Testing console logs
     console.log("TOTAL STANDS",totalStands,typeof totalStands)
     console.log("PRED NUM",pred_number,typeof pred_number)
     console.log("PERCENTAGE",pred_number/totalStands)
+    
+    // if the number of bikes available is less than 30%
     if (pred_number/totalStands < .3){
         message.innerHTML="Poor Availability"
-    }else if (pred_number/totalStands > .3 && pred_number/totalStands <.6){
+    }// if it is between 30 and 60
+    else if (pred_number/totalStands > .3 && pred_number/totalStands <.6){
         message.innerHTML="Good Availability"
-    }else if (pred_number/totalStands >.6) {
+    }// if it is greater than 60%
+    else if (pred_number/totalStands >.6) {
         message.innerHTML="Great Availability"
     }
     
@@ -154,27 +163,31 @@ function initMap() {
             option.setAttribute("data-station", markers.length - 1);
             
             marker.addListener("click", () => {
+                
                 var showDetails = document.getElementById("stationsTable");
                 var contents= showDetails.innerHTML;
-                showDetails.innerHTML="";
-
                 showDetails.innerHTML =   "<h1 class='Number'>Number:" + station.Number +
                                             "</h1><h1>Name: " + station.Name +
                                             "</h1><h1>BikeStands: " + station.BikeStands + 
                                             "</h1><p>Available Bikes:" + station.AvailableBikes + 
                                             "</p><p>Available Stands:" + station.AvailableBikeStands + 
                                             "</p>"+
-                                            contents;
-                
+                                            calanderContents
+                //calanderContents is the original contents of the stationTable (calander)
+                ;
+                //Creates the button which when pressed fetches the prediction
                 var btn= document.createElement("button")
                 btn.innerHTML="Show me";
-                btn.id=station.Number;
+                //btn.id=station.Number;
+                // create predicted variable (got buggy if it wasnt defined outside of the addEventListener)
                 let predicted
                 btn.addEventListener("click",function(){
+                    // sets the Onlick functionality of the button to Calling the predict sender function with the appropriate variables as argument
                     predicted = predictSender(station.Number,station.BikeStands)
                 });
                 document.getElementById("calander").appendChild(btn);
-                //showDetails.appendChild(btn);
+                
+                // Creates the max and Min dates for the calander (Setting the seconds,milliseconds and Minnutes to 0 prevents the user from selecting those from the calander)
                 var date=new Date();
                 date.setSeconds(0,0);
                 date.setMilliseconds(0,0);
@@ -194,8 +207,9 @@ function initMap() {
                 infoWindow.setContent("<h2>" + marker.getTitle() + "</h2>");
                 infoWindow.open(marker.getMap(), marker);
 
-                //drawChart(station, station.AvailableBikes, station.AvailableBikeStands);
-                buttonPrediction(station.Number, station.Name);
+                //Creates the charts;
+                chartMaker(station.Number, station.Name);
+                //Unhides everything (if hidden already)
                 infoHider();
             });
           
@@ -224,12 +238,13 @@ function stationsDropDown(e) {
 }
 
 
-// Functions that return the json data of calling the queries. Uses promises to allow for async operation (else the charts wouldnt be made correctly in time)
+// Functions that return the json data of the past week of stand history. Uses promises to allow for async operation (else the charts wouldnt be made correctly in time)
 function json_getter_week(){
     return new Promise((resolve,reject) => {
             fetch("/btnFunc").then(
             function(response){
                 console.log(response)
+                // if the response isnt successfull
                 if (response.status !== 200){
                     console.log("Somethings gone horribly wrong. Status code: " +response.status);
                     return;
@@ -243,6 +258,7 @@ function json_getter_week(){
     })
 };
 
+// Same logic as above but returns the data from the past 24 hours
 function json_getter_day(){
     return new Promise((resolve,reject) => {
             fetch("/btnFuncDay").then(
@@ -261,11 +277,11 @@ function json_getter_day(){
     })
 };
 
-// This sends a variable (going to be the station number) back to flask to be used in a query
+// This sends a variable (station number) back to flask to be used in a query to the database
 function varSender(number){
     console.log("WORKING")
     console.log(number)
-
+    // sends the variable to the flask app in a json format with the "key" number
     $.ajax({
         type: 'POST',
         url: '/varSender',
@@ -273,20 +289,19 @@ function varSender(number){
         dataType: 'json',
         data: JSON.stringify({number}),
     });
-    // stop link reloading the page
-    // event.preventDefault();
-        
+
 }
 
 // Button functionality
-async function buttonPrediction(station_number,station_name){
+async function chartMaker(station_number,station_name){
+    //sends the station number to the flask app to be used in the sql query
     varSender(station_number);
     
     let dailyLoad=document.getElementById("dailyChart").getContext("2d")
     
    let weeklyLoad=document.getElementById("weeklyChart").getContext("2d")
     
-    
+    // creates a loading wheel while the data is being retrieved
     let dayload=new Chart(dailyLoad,{
         type:"doughnut",
         data:{
@@ -296,6 +311,7 @@ async function buttonPrediction(station_number,station_name){
                 backgroundColor:"#9bc3ca"
             }]
         },
+        // disables interaction
         options:{
             tooltips:{enabled:false},
             hover: {mode:null},
@@ -333,7 +349,8 @@ async function buttonPrediction(station_number,station_name){
     var weekTimes = []
     var weekAvailBikes=[]
     var weekAvailStands=[]
-
+    
+    // Calls the data from the SQL query (for the past week and the past 24 hours) into a json variable
     var jsonweek = await json_getter_week();
     var jsonday = await json_getter_day();
     
@@ -363,6 +380,7 @@ async function buttonPrediction(station_number,station_name){
     let weeklyChart=document.getElementById("weeklyChart")
     weeklyChart.getContext("2d")
     
+    // create the chart for past 24 hours
    let daychart= new Chart(dailyChart,{
         type:"line",
         data:{
@@ -390,7 +408,7 @@ async function buttonPrediction(station_number,station_name){
          }
     });
 
-    
+    //create the chart for the past week
     let weekChart =new Chart(weeklyChart,{
         type:"line",
         data:{
@@ -419,7 +437,8 @@ async function buttonPrediction(station_number,station_name){
     
     });;
 };
-    
+   
+// as the day value returned from the SQL query is 0-6 this just converts it into is string representation for easier legibility
 function dayConverter(day_number){
     var days={
         0 : "Sunday",

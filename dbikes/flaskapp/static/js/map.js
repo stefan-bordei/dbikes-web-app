@@ -206,10 +206,15 @@ function initMap() {
     });
 }
 
-function stationsDropDown(selectObject) {
-    const targetMarkerIndex = selectObject.selected.getAttribute("data-station");
+// Get the element from the Dropdown menu and link it to the marker onClick event
+document.getElementById("dropdown").addEventListener("change", stationsDropDown);
+
+function stationsDropDown(e) {
+    var selectObject = e.target;
+    console.log("Selected: ", selectObject.options[selectObject.selectedIndex].getAttribute("data-station"));
+    const targetMarkerIndex = selectObject.options[selectObject.selectedIndex].getAttribute("data-station");
     const targetMarker = markers[targetMarkerIndex];
-    google.maps.event.trigger(marker, "click");
+    google.maps.event.trigger(targetMarker, "click");
     
     if(selectObject && selectObject.selected){
         const targetMarkerIndex = selectObject.getAttribute("data-station");
@@ -218,33 +223,6 @@ function stationsDropDown(selectObject) {
     }
 }
 
-/*
-// draw the PIE Chart    
-function drawChart(station, bikes, bstands) {
-    console.log("Printing chart")
-    if (!station) {return false;}
-    
-    // Create the data table.
-    var chartData = new google.visualization.DataTable();
-    chartData.addColumn('string', 'Name');
-    chartData.addColumn('number', 'Available Bikes');
-    chartData.addRows([
-    ['AvailableBikes', bikes],
-    ['AvailableBikeStands', bstands]
-    ]);
-
-    // Set chart options
-    var options = {
-                'width':'100%',
-                'height':'500',
-                'margin-left': 'auto',
-                'margin-right': 'auto',};
-          
-    // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.PieChart(document.getElementById('pieChart'));
-    chart.draw(chartData, options);
-}
-*/
 
 // Functions that return the json data of calling the queries. Uses promises to allow for async operation (else the charts wouldnt be made correctly in time)
 function json_getter_week(){

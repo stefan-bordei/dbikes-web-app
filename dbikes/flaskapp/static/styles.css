@@ -17,13 +17,15 @@ margin-right:auto;
 }
 
 
-
+#stationsTable > *{
+    border:1px solid rgba(255,255,255,1)
+}
 #stationsTable{
     position:absolute;
     top:10%;
     background-color: rgba(255,255,255,.9);
     width: 20%;
-    height: 90%;
+    height: 50%;
     left: 1%;
     font-size: 3 vw 3vh;
     font-family: Tahoma, sans-serif;
@@ -40,12 +42,16 @@ margin-right:auto;
     width: 50%;
 }
 
-
+#Message {
+    padding-top: 15px;
+    font-size:25px;
+}
 
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    background-image:radial-gradient(rgba(200,200,200,1),rgba(255,255,255,1))
 }
 
 .nav ul {
@@ -160,15 +166,23 @@ html, body {
 
 .hero-image {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0.5, 0.1)), url(/static/img/bner.jpg);
-  height: 50%;
+  height: 100%;
   width: 100%;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
-  margin-top: 20px;
+    margin-top:20px;
 }
 
+#homeLink{
+    color: white;
+    text-decoration: none;
+    background-color: rgba(255, 255, 255, .15); 
+}
+#homeLink:hover{
+    background-color: rgba(255, 255, 255, .3)
+}
 .hero-text {
   text-align: center;
   position: absolute;
@@ -176,6 +190,8 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
+    font-size: 40px;
+    text-shadow: 1px 1px black;
 }
 
 .hero-text button {

@@ -17,7 +17,6 @@
             <ul>
                 <li><a class='active' href="{{ url_for('home') }}">Home</a></li>
                 <li><a href="{{ url_for('mapbikes') }}">Map</a></li>
-                <li><a href="{{ url_for('plan') }}">Plan your trips</a></li>
                 <li><a href="{{ url_for('about') }}">About us</a></li>
                 <li><a href="{{ url_for('contacts') }}">Contact us</a></li>
             </ul>
@@ -27,8 +26,9 @@
     <div class="main-body">
         <div class="hero-image" >
             <div class="hero-text">
-                <h1>We are dBikes</h1>
+                <h1>Dublin Bikes</h1>
                 <p>Never miss a bike trip!</p>
+                <a id="homeLink" href="{{ url_for('mapbikes') }}">See the Map</a>
             </div>
         </div>
     </div>

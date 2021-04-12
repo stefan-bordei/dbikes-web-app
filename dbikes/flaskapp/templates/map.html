@@ -40,8 +40,13 @@
             <div id="map"></div>
             <div hidden id="stationsTable">
                 <div id="calander">
-                    <label for="timePicker">See Predicted Availablity</label>
-                    <input type="datetime-local" id="timePicker" name="timePicker">
+                    <label for="datePicker">Choose a date</label>
+                    <input type="date" id="datePicker" name="timePicker">
+                    <br>
+                    <label for="timePicker">Select a time</label>
+                    <input type="time" id="timePicker" name="timePicker">
+                </div>
+                <div id="buttonPlace">
                 </div>
                 <div id="Message">
                 </div>
@@ -55,12 +60,12 @@
         <canvas id="weeklyChart"></canvas>
         </div>
     
-    </div>
-        <script src="{{ url_for('static', filename='js/map.js') }}"></script>
-        
+    </div>        
         <script
             src="https://maps.googleapis.com/maps/api/js?key={{apiKey}}&callback=initMap&libraries=&v=weekly"
         async
         ></script>
+            <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
 </body>
 </html>

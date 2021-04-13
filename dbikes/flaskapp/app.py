@@ -168,6 +168,7 @@ def predGet():
         print(data)
         session["station_number"] = str(data["number"])
         session["date"]=str(data["date"])
+        session["time"]=str(data["time"])
         # after setting the variables thi is then routed to the predSend function
         return redirect(url_for("predSend"))
 
@@ -181,16 +182,17 @@ def predSend():
     # retrieves the session variables (station number and the date for the prediction
     number= session.get("station_number",None)
     date=session.get("date",None)
-    # format for reformatting the retrieved date for the prediction model
-    p = '%Y-%m-%dT%H:%M'
+    time=session.get("time",None)
+    print("Testing",date,time)
+    print(type(date))
+
+    date=datetime.strptime(date,'%Y-%m-%d')
+
     # set weekday to True
     weekday = True
-    # format the date so it works with the prediction
-    date =datetime.strptime(date,p)
-    # remove the minutes
-    date=date.replace(minute=0)
+
     # retrieve the hour (hour is one of the variables used in the prediction
-    hour=date.hour
+    hour=int(time.split(":")[0])
     # set the weeday to false if the prediction date day is saturday or sunday
     if date.day > 5:
         weekday=False

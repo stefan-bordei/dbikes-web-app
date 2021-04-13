@@ -16,10 +16,7 @@ margin-right:auto;
     display: block;
 }
 
-/* This applys a white border to the elements of the stationsTable div, this helps with readability */
-#stationsTable > *{
-    border:1px solid rgba(255,255,255,1)
-}
+
 #stationsTable{
     /* position absolute allows the table to show up infront of the map */
     position:absolute;
@@ -33,6 +30,7 @@ margin-right:auto;
     font-family: Tahoma, sans-serif;
     /* overflow auto allows the background colour to apply to the nested calander divs */
     overflow: auto;
+    border:1px solid rgba(255,255,255,1)
 
 }
 

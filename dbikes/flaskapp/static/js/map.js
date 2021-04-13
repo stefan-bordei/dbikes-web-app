@@ -13,14 +13,12 @@ google.charts.setOnLoadCallback(drawChart);
 
 let map;
 
+
+
 //This function removes the hidden attributes from the map infowindow and its contents
 function infoHider(){
     let hidden_div=document.getElementById("stationsTable")
     hidden_div.removeAttribute("hidden")
-    
-    
-    let hidden_cal=document.getElementById("timePicker")
-    hidden_cal.removeAttribute("hidden")
 }
 
 // This function receives the results of running the prediction model with the given variables
@@ -54,7 +52,9 @@ var calanderContents= tablediv.innerHTML;
 // async Function to return the predicted number of free bikes which is broken down into Poor,Good and Great availability
 async function predictSender(number,totalStands){
     // retrieves the inputted date (from the calander)
-    var date=document.getElementById("timePicker").value
+    var date=document.getElementById("datePicker").value;
+    var time=document.getElementById("timePicker").value;
+    
     let pred_number
     // This sends the date and the station number to the Flask app file to be used in the prediction
     $.ajax({
@@ -62,7 +62,7 @@ async function predictSender(number,totalStands){
         url: '/predGetter',
         contentType: 'application/json;charset=UTF-8',
         dataType: 'json',
-        data: JSON.stringify({number,date}),
+        data: JSON.stringify({number,date,time}),
     });
     
     // call the predictGetter function and wait for the result
@@ -172,20 +172,22 @@ function initMap() {
                                             "</h1><p>Available Bikes:" + station.AvailableBikes + 
                                             "</p><p>Available Stands:" + station.AvailableBikeStands + 
                                             "</p>"+
-                                            calanderContents
+                                            calanderContents+"<br>";
                 //calanderContents is the original contents of the stationTable (calander)
                 ;
                 //Creates the button which when pressed fetches the prediction
-                var btn= document.createElement("button")
+                var btn= document.createElement("button");
+                btn.setAttribute("id","predictBtn");
                 btn.innerHTML="Show me";
-                //btn.id=station.Number;
+                //btn.disabled= true;
                 // create predicted variable (got buggy if it wasnt defined outside of the addEventListener)
                 let predicted
                 btn.addEventListener("click",function(){
                     // sets the Onlick functionality of the button to Calling the predict sender function with the appropriate variables as argument
                     predicted = predictSender(station.Number,station.BikeStands)
                 });
-                document.getElementById("calander").appendChild(btn);
+                document.getElementById("buttonPlace").appendChild(btn);
+                
                 
                 // Creates the max and Min dates for the calander (Setting the seconds,milliseconds and Minnutes to 0 prevents the user from selecting those from the calander)
                 var date=new Date();
@@ -199,8 +201,8 @@ function initMap() {
                 now.setMinutes(0,0);
 
                 date.setDate(date.getDate()+7)
-                document.getElementById("timePicker").max=date.toISOString().split(".")[0];
-                document.getElementById("timePicker").min=now.toISOString().split(".")[0];                            
+                document.getElementById("datePicker").max=date.toISOString().split(".")[0];
+                document.getElementById("datePicker").min=now.toISOString().split(".")[0];                            
                 // Generate infoWindow with station Name and make it dissapear 
                 // when clicking on another marker
                 infoWindow.close();
@@ -219,6 +221,19 @@ function initMap() {
         console.log("OOPS!", err);
     });
 }
+
+/*
+document.getElementById("timePicker").addEventListener("change",buttonEnable(),false);
+
+function buttonEnable(){
+    console.log("JAVASCRIPT IS TRUE HUMAN SUFFERING")
+    var buttons =document.getElementsByTagName("button");
+    for (let i=0; i<buttons.length;i++){
+        buttons[i].disabled=false;
+    }
+
+    }
+*/
 
 // Get the element from the Dropdown menu and link it to the marker onClick event
 document.getElementById("dropdown").addEventListener("change", stationsDropDown);

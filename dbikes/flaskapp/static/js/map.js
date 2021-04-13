@@ -78,13 +78,13 @@ async function predictSender(number,totalStands){
     
     // if the number of bikes available is less than 30%
     if (pred_number/totalStands < .3){
-        message.innerHTML="Poor Availability"
+        message.innerHTML="Poor"+"<br>"+"<30% Availability"
     }// if it is between 30 and 60
     else if (pred_number/totalStands > .3 && pred_number/totalStands <.6){
-        message.innerHTML="Good Availability"
+        message.innerHTML="Good"+"<br>"+"<60% Availability"
     }// if it is greater than 60%
     else if (pred_number/totalStands >.6) {
-        message.innerHTML="Great Availability"
+        message.innerHTML="Great"+"<br>"+">60% Availability"
     }
     
 };
@@ -194,15 +194,18 @@ function initMap() {
                 date.setSeconds(0,0);
                 date.setMilliseconds(0,0);
                 date.setMinutes(0,0);
+                
 
                 var now = new Date();
                 now.setSeconds(0,0);
                 now.setMilliseconds(0,0);
                 now.setMinutes(0,0);
+                console.log(now.toISOString())
 
                 date.setDate(date.getDate()+7)
-                document.getElementById("datePicker").max=date.toISOString().split(".")[0];
-                document.getElementById("datePicker").min=now.toISOString().split(".")[0];                            
+                console.log(date.toISOString())
+                document.getElementById("datePicker").max=date.toISOString().split("T")[0];
+                document.getElementById("datePicker").min=now.toISOString().split("T")[0];                            
                 // Generate infoWindow with station Name and make it dissapear 
                 // when clicking on another marker
                 infoWindow.close();

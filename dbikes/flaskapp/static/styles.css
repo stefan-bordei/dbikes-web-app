@@ -9,11 +9,12 @@
 }
 
 #map { 
-height: 100%; 
-width :100%; 
-margin-left:auto; 
-margin-right:auto;
+    height: 100%; 
+    width :100%; 
+    margin-left:auto; 
+    margin-right:auto;
     display: block;
+    border-bottom:5px solid rgba(0,0,0, .1)
 }
 
 
@@ -30,7 +31,7 @@ margin-right:auto;
     font-family: Tahoma, sans-serif;
     /* overflow auto allows the background colour to apply to the nested calander divs */
     overflow: auto;
-    border:1px solid rgba(255,255,255,1)
+    
 
 }
 
@@ -54,7 +55,9 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    background-image:radial-gradient(rgba(200,200,200,1),rgba(255,255,255,1))
+    background-image: url(/static/img/bgnd_geo.jpg);
+    background-blend-mode: multiply;
+    overflow: auto;
 }
 
 .nav ul {
@@ -69,15 +72,15 @@ html, body {
 .nav a {
     display: inline-block;
     padding: .5em;
-    color: white;
+    color: rgba(0, 0, 0, .5);
     text-decoration: none;
 }
 
 .nav a:hover {
-    background-color: rgba(255, 255, 255, .3);
+    background-color: rgba(0, 0, 0, .2);
 }
 .nav a.active {
-    background-color: rgba(255, 255, 255, .15);
+    background-color: rgba(0, 0, 0, .1);
 }
 
 .nav dropdown {
@@ -88,20 +91,16 @@ html, body {
 .main-nav {
     text-align: center;
     font-size: 1.1em;
-    font-weight: lighter;
-    border-bottom: 1px solid rgba(255, 255, 255, .3);
+    border-bottom: 2px solid rgba(0, 0, 0, .1);
 }
 
 
 .main-header {
-    background-color: rgba(0, 0, 0, .6);
-    background-image: url(/static/img/banner1.png);
+    background-color: rgba(0, 0, 0, 0);
     background-blend-mode: multiply;
     background-size: cover;
-    padding-bottom: 90px;
     
 }
-
 
 .main-body {
     margin: 0 auto;
@@ -111,23 +110,22 @@ html, body {
     padding-right: 0;
     height: 100%;
 }
-/*
-#map { 
-    height: 65%;
-    width: 85%;
-    margin-right: auto;
-    margin-left: auto;
-    margin-top: 20px;
+
+.landing-body {
+    margin: 0 auto;
+    padding: 0 1.5em;
+    /* padding right and left at 0 allows the map and hero image to cover the screen fully (no white side borers)*/
+    padding-left: 0;
+    padding-right: 0;
+    height: 90%;
 }
-*/
+
 .dd {
     display: block;
     padding: 5px;
     margin-left: auto;
     margin-right: auto;
 }
-
-
 
 .details {
     padding-top: 15px;
@@ -153,25 +151,9 @@ html, body {
  
 }
 
-/*
-#ChartsDay {
-    grid-column-start: 2;
-    grid-column-end: 2;
-    grid-row-start: 1;
-    grid-row-end: 2;
-    width: 60%;
-}
-#ChartsWeek {
-    grid-column-start: 2;
-    grid-column-end: 3;
-    grid-row-start: 2;
-    grid-row-end: 2;
-    width: 60%;
-}
-*/
 
 .hero-image {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0.5, 0.1)), url(/static/img/bner.jpg);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.2)), url(/static/img/bner.jpg);
   height: 100%;
   width: 100%;
   background-position: center;

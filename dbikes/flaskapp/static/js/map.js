@@ -210,6 +210,11 @@ function initMap() {
                                             "<p>Visibility:"+weather_visibility+"</p>";
                 
                 //Creates the button which when pressed fetches the prediction
+                var oldbtn= document.getElementById("predictBtn");
+                
+                if(oldbtn){
+                    oldbtn.remove();
+                }
                 var btn= document.createElement("button");
                 btn.setAttribute("id","predictBtn");
                 btn.innerHTML="Show me";

@@ -17,20 +17,34 @@
 }
 
 
+#predTable{
+    position: absolute;
+    top:10%;
+    width: 20%;
+    height: 30%;
+    right:1%;
+    background-color: rgba(255,255,255,.9);
+    font-size: 3 vw 3vh;
+    font-family: Tahoma, sans-serif;
+    overflow: auto;
+    border: 3px solid black;
+    text-align: center;
+}
+
 #stationsTable{
     /* position absolute allows the table to show up infront of the map */
     position:absolute;
     top:10%;
     background-color: rgba(255,255,255,.9);
     width: 20%;
-    height: 70%;
+    height: 80%;
     left: 1%;
     /* sets the font size to be relative to the container size/ prevents overflow */
     font-size: 3 vw 3vh;
     font-family: Tahoma, sans-serif;
     /* overflow auto allows the background colour to apply to the nested calander divs */
     overflow: auto;
-    border: 3px;
+    border: 3px solid black;
 }
 
 /* sets the charts to be left and right at the bottom */
@@ -49,6 +63,10 @@
     font-size:25px;
 }
 
+.main-header{
+    margin-bottom: 0;
+}
+
 html, body {
     height: 100%;
     margin: 0;
@@ -58,6 +76,16 @@ html, body {
     overflow: auto;
 }
 
+.div main-nav{
+    margin-bottom: 0;
+    
+}
+
+.title{
+    padding-right:50%;
+    font-family: Georgia, serif;
+    font-size: 40px;
+}
 .nav ul {
     margin: 0;
     padding: 0;
@@ -65,14 +93,21 @@ html, body {
 
 .nav li {
     display: inline;
+    color: rgba(0, 0, 0, .6);
+    
 }
 
 .nav a {
     display: inline-block;
-    padding: .5em;
     color: rgba(0, 0, 0, .6);
+    padding-left: 2%;
+    padding-right: 2%;
+    font-family: Georgia, serif;
+    /*color: rgba(0, 0, 0, .6);*/
     text-decoration: none;
 }
+
+
 
 .nav a:hover {
     background-color: rgba(0, 0, 0, .2);
@@ -294,5 +329,30 @@ footer {
   .column {
     width: 100%;
     display: block;
+    }
+  .title{
+    padding:0;
+}
+.nav ul {
+    margin: 0;
+    padding: 0;
+}
+
+.nav li {
+    display: inline;
+    color: rgba(0, 0, 0, .6);
+    
+}
+
+.nav a {
+    display: inline-block;
+    color: rgba(0, 0, 0, .6);
+    padding-left: 0;
+    padding-right:0;
+    /*color: rgba(0, 0, 0, .6);*/
+    text-decoration: none;
+}   
+      
   }
+    
 

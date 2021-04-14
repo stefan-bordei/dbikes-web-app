@@ -2,18 +2,7 @@
 var markers = [];
 var availableMarkers = [];
 
-/*
-// Load the Visualization API and the corechart package.
-google.charts.load('current', {'packages':['corechart']});
-
-// Set a callback to run when the Google Visualization API is loaded.
-google.charts.setOnLoadCallback(drawChart);
-*/
-
-
 let map;
-
-
 
 //This function removes the hidden attributes from the map infowindow and its contents
 function infoHider(){
@@ -37,7 +26,6 @@ function predictGetter(){
                     return;
                     }
             response.json().then(function(data){
-                console.log("Prediction",data);
                 //returns the prediction (e.g the predicted amount of free bikes)
                 resolve(data);
             });
@@ -75,9 +63,9 @@ async function predictSender(number,totalStands){
     
     var message=document.getElementById("Message")
     // Testing console logs
-    console.log("TOTAL STANDS",totalStands,typeof totalStands)
-    console.log("PRED NUM",pred_number,typeof pred_number)
-    console.log("PERCENTAGE",pred_number/totalStands)
+    //console.log("TOTAL STANDS",totalStands,typeof totalStands)
+    //console.log("PRED NUM",pred_number,typeof pred_number)
+    //console.log("PERCENTAGE",pred_number/totalStands)
     
     // if the number of bikes available is less than 30%
     if (pred_number/totalStands < .3){
@@ -100,7 +88,6 @@ function weatherGetter(){
     fetch("/wthrGetter").then(response => {
         return response.json();
     }).then(data => {
-        console.log("Weather",data);
         weather_desc = data[0].Description
         weather_temp = data[0].Temperature
         // conver the temp to a float and then to celcius
@@ -108,26 +95,20 @@ function weatherGetter(){
         // round to two decimal places
         weather_temp= Number((weather_temp).toFixed(2));
         weather_visibility=data[0].Visibility
-        console.log("Weather variables",weather_desc,weather_temp,weather_desc)
+        //console.log("Weather variables",weather_desc,weather_temp,weather_desc)
     }).catch(err => {
         console.log("Error in retrieving Weahter data!", err);
-});
-              }
+    });
+}
 
 weatherGetter()
-
-
-
-        
-
 
 function initMap() {
     
     fetch("/stations").then(response => {
         return response.json();
     }).then(data => {
-        console.log("data: ", data);
-        
+
         map = new google.maps.Map(document.getElementById("map"), {
             center: { lat: 53.349804, lng: -6.260310 },
             zoom: 14,
@@ -183,7 +164,6 @@ function initMap() {
               
             option.addEventListener("click", () => {
                 google.maps.event.trigger(marker, "click");
-                console.log("CLICKED!!" + option.text);
             }); 
             
             
@@ -239,10 +219,10 @@ function initMap() {
                 now.setSeconds(0,0);
                 now.setMilliseconds(0,0);
                 now.setMinutes(0,0);
-                console.log(now.toISOString())
+                //console.log(now.toISOString())
 
                 date.setDate(date.getDate()+7)
-                console.log(date.toISOString())
+                //console.log(date.toISOString())
                 document.getElementById("datePicker").max=date.toISOString().split("T")[0];
                 document.getElementById("datePicker").min=now.toISOString().split("T")[0];                            
                 // Generate infoWindow with station Name and make it dissapear 
@@ -264,25 +244,12 @@ function initMap() {
     });
 }
 
-/*
-document.getElementById("timePicker").addEventListener("change",buttonEnable(),false);
-
-function buttonEnable(){
-    console.log("JAVASCRIPT IS TRUE HUMAN SUFFERING")
-    var buttons =document.getElementsByTagName("button");
-    for (let i=0; i<buttons.length;i++){
-        buttons[i].disabled=false;
-    }
-
-    }
-*/
 
 // Get the element from the Dropdown menu and link it to the marker onClick event
 document.getElementById("dropdown").addEventListener("change", stationsDropDown);
 
 function stationsDropDown(e) {
     var selectObject = e.target;
-    console.log("Selected: ", selectObject.options[selectObject.selectedIndex].getAttribute("data-station"));
     const targetMarkerIndex = selectObject.options[selectObject.selectedIndex].getAttribute("data-station");
     const targetMarker = markers[targetMarkerIndex];
     google.maps.event.trigger(targetMarker, "click");
@@ -300,33 +267,30 @@ function json_getter_week(){
     return new Promise((resolve,reject) => {
             fetch("/btnFunc").then(
             function(response){
-                console.log(response)
                 // if the response isnt successfull
                 if (response.status !== 200){
                     console.log("Somethings gone horribly wrong. Status code: " +response.status);
                     return;
                     }
             response.json().then(function(data){
-                console.log("Table data week: ",data)
                 //return data;
                 resolve(data)
             });
             });
     })
 };
+
 
 // Same logic as above but returns the data from the past 24 hours
 function json_getter_day(){
     return new Promise((resolve,reject) => {
             fetch("/btnFuncDay").then(
             function(response){
-                console.log(response)
                 if (response.status !== 200){
                     console.log("Somethings gone horribly wrong. Status code: " +response.status);
                     return;
                 }
             response.json().then(function(data){
-                console.log("Table data day: ",data)
                 //return data;
                 resolve(data)
             });
@@ -334,10 +298,9 @@ function json_getter_day(){
     })
 };
 
+
 // This sends a variable (station number) back to flask to be used in a query to the database
 function varSender(number){
-    console.log("WORKING")
-    console.log(number)
     // sends the variable to the flask app in a json format with the "key" number
     $.ajax({
         type: 'POST',
@@ -348,6 +311,7 @@ function varSender(number){
     });
 
 }
+
 
 // Button functionality
 async function chartMaker(station_number,station_name){
@@ -377,8 +341,7 @@ async function chartMaker(station_number,station_name){
                 
             }
         }
-    }
-            );
+    });
     
      let weekload=new Chart(weeklyLoad,{
         type:"doughnut",
@@ -397,8 +360,8 @@ async function chartMaker(station_number,station_name){
                 
             }
         }
-    }
-            );
+    });
+     
     // empty arrays to save the individual variables to for chart purposes
     var daytimes = [];
     var dayAvailBike = [];

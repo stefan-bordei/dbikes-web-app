@@ -1,21 +1,17 @@
 from flask import Flask, render_template, request,session,redirect,url_for
 from sqlalchemy import create_engine
 from sqlalchemy import *
-
 from sqlalchemy.ext.declarative import declarative_base, ConcreteBase
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import *
 from sqlalchemy import exc
-from datetime import datetime, timedelta
 from random import randint
 import logging
 import requests
-import datetime
 import time
 import os
 import json,requests
 import pickle
-
 import json,requests
 #imports the pickle file used for the predictions
 pickle_in = open("dict.pickle","rb")
@@ -93,7 +89,7 @@ def mapbikes():
 @app.route("/contacts",methods=["GET","POST"])
 def contacts():
     if request.method == "POST":
-        engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+        engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=False)
         CustomerQueries.__table__.create(bind=engine, checkfirst=True)
         Session = sessionmaker(bind=engine)
         session = Session()
@@ -101,7 +97,6 @@ def contacts():
         req = request.form
         session.add(CustomerQueries(**map_customer_query_data(request.form)))
         session.commit()
-        print(f"mail: {req['emailAddress']}\nsubject: {req['subject']}")
 
         return redirect(request.url)
 
@@ -110,7 +105,7 @@ def contacts():
 
 @app.route("/stations")
 def stations():
-    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=False)
     df_static = pd.read_sql_table("static_stations", engine)
     df_live = pd.read_sql_table("dynamic_stations_live", engine)
     return df_static.merge(df_live, on=["Number"]).to_json(orient='records')
@@ -140,7 +135,7 @@ def buttonFunction():
     """
     # sets the number variable to the session variable station_number (which is set from the JS)
     number = session.get("station_number",None)
-    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=False)
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE dynamic_stations.LastUpdate > DATE(NOW()) - INTERVAL 6 DAY AND Number = {number} GROUP BY DAY (dynamic_stations.LastUpdate) ORDER BY DAY(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
 
@@ -152,7 +147,7 @@ def buttonFunctionDay():
         function which performs an SQL query to return the  historical data (past 24 hours) for a station where a station number matches the provided number
         """
     number = session.get("station_number",None)
-    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=False)
     dateDiff = (datetime.now() - timedelta(1)).timestamp() # gets the epoch time this time 24 hours ago
     df = pd.read_sql_query(f"SELECT DISTINCT Number, AvailableBikeStands, AvailableBikes, LastUpdate from dynamic_stations WHERE LastUpdate > {dateDiff} AND Number = {number} GROUP BY HOUR (dynamic_stations.LastUpdate) ORDER BY HOUR(dynamic_stations.LastUpdate)", engine)
     return df.to_json(orient='records')
@@ -165,7 +160,6 @@ def predGet():
     """
     if request.method == "POST":
         data = request.get_json()
-        print(data)
         session["station_number"] = str(data["number"])
         session["date"]=str(data["date"])
         session["time"]=str(data["time"])
@@ -183,8 +177,6 @@ def predSend():
     number= session.get("station_number",None)
     date=session.get("date",None)
     time=session.get("time",None)
-    print("Testing",date,time)
-    print(type(date))
 
     date=datetime.strptime(date,'%Y-%m-%d')
 
@@ -202,7 +194,6 @@ def predSend():
     temp=0
     humid=0
     rain=False
-    print("DOWN TO URL")
 
     # URl for the weather forecast data
     BASE_URL = "http://api.openweathermap.org/data/2.5/forecast?id=2964574&appid=8ae40bdb25ab978b8f3e77a14b91b68d"
@@ -225,7 +216,6 @@ def predSend():
                     # set rain to true
                     rain=True
 
-    print("DID JSON")
     # if the temperature is given in Kelvin convert to celcius (most of the time it is in kelvin but just incase)
     if temp >100:
         # technically could mess up the temperature if it was over 100 and in celcius but if it ever gets that hot the prediction model being thrown off is the least of our worries
@@ -234,10 +224,6 @@ def predSend():
     d={"Hour":hour,"Temperature":temp,"Rain":rain,"isWeekDay":weekday}
     # creates a dataframe from that data (prediction model requires a dataframe)
     data=pd.DataFrame(d,index=[0])
-    print("DATAFRAME MADE")
-    print(data)
-    print(data.shape)
-    print(data.dtypes)
     # Uses the prediction model for the station number with the dataframe
     prediction=regression_models[int(number)]
 
@@ -250,7 +236,7 @@ def weatherGetter():
         function which performs an SQL query to return the most recent weather data
         """
     number = session.get("station_number",None)
-    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=False)
     df = pd.read_sql_query(f"SELECT * from weather_data ORDER BY id DESC LIMIT 1", engine)
     return df.to_json(orient='records')
 

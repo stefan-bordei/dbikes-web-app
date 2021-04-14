@@ -244,6 +244,15 @@ def predSend():
     # returns the predicted free Bike amount
     return str(prediction.predict(data)[0])
 
+@app.route("/wthrGetter")
+def weatherGetter():
+    """
+        function which performs an SQL query to return the most recent weather data
+        """
+    number = session.get("station_number",None)
+    engine = create_engine(f"mysql+mysqlconnector://{DB_NAME}:{DB_PASS}@{DB_HOST}/dbikes_main", echo=True)
+    df = pd.read_sql_query(f"SELECT * from weather_data ORDER BY id DESC LIMIT 1", engine)
+    return df.to_json(orient='records')
 
 
 

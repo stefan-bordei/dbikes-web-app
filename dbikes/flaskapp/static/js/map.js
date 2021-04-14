@@ -19,6 +19,9 @@ let map;
 function infoHider(){
     let hidden_div=document.getElementById("stationsTable")
     hidden_div.removeAttribute("hidden")
+    
+    let hidden_prediction=document.getElementById("predTable")
+    hidden_prediction.removeAttribute("hidden")
 }
 
 // This function receives the results of running the prediction model with the given variables
@@ -88,6 +91,34 @@ async function predictSender(number,totalStands){
     }
     
 };
+
+// These variable store the current weather data which is obtained via the function underneath
+let weather_desc;
+let weather_temp;
+let weather_visibility;
+function weatherGetter(){
+    fetch("/wthrGetter").then(response => {
+        return response.json();
+    }).then(data => {
+        console.log("Weather",data);
+        weather_desc = data[0].Description
+        weather_temp = data[0].Temperature
+        // conver the temp to a float and then to celcius
+        weather_temp = parseFloat(weather_temp) -273.15
+        // round to two decimal places
+        weather_temp= Number((weather_temp).toFixed(2));
+        weather_visibility=data[0].Visibility
+        console.log("Weather variables",weather_desc,weather_temp,weather_desc)
+    }).catch(err => {
+        console.log("Error in retrieving Weahter data!", err);
+});
+              }
+
+weatherGetter()
+
+
+
+        
 
 
 function initMap() {
@@ -163,18 +194,21 @@ function initMap() {
             option.setAttribute("data-station", markers.length - 1);
             
             marker.addListener("click", () => {
+
                 
                 var showDetails = document.getElementById("stationsTable");
                 var contents= showDetails.innerHTML;
                 showDetails.innerHTML =   "<h1 class='Number'>Number:" + station.Number +
-                                            "</h1><h1>Name: " + station.Name +
-                                            "</h1><h1>BikeStands: " + station.BikeStands + 
-                                            "</h1><p>Available Bikes:" + station.AvailableBikes + 
+                                            "</h1><h2>Name: " + station.Name +
+                                            "</h2><h2>BikeStands: " + station.BikeStands + 
+                                            "</h2><p>Available Bikes:" + station.AvailableBikes + 
                                             "</p><p>Available Stands:" + station.AvailableBikeStands + 
-                                            "</p>"+
-                                            calanderContents+"<br>";
-                //calanderContents is the original contents of the stationTable (calander)
-                ;
+                                            "</p>"+"<br>"+
+                                            "<h1> Weather </h1>"+
+                                            "<h2>"+weather_desc+"</h2>"+
+                                            "<p>Temperature:"+weather_temp +"c</p>"+
+                                            "<p>Visibility:"+weather_visibility+"</p>";
+                
                 //Creates the button which when pressed fetches the prediction
                 var btn= document.createElement("button");
                 btn.setAttribute("id","predictBtn");

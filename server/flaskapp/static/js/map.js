@@ -410,6 +410,7 @@ async function chartMaker(station_number,station_name){
                 data:dayAvailBike,
                 borderColor:"#4f8c96",
                backgroundColor:"#9bc3ca"
+               
                 
             },{
                 label:"Free Stands",
@@ -419,12 +420,10 @@ async function chartMaker(station_number,station_name){
             }]
         },
          options:{
-             plugins:{
                  title:{
                      display: true,
-                     text: "Past 24 hours"
+                     text: "Past 24 hours bike availability"
                  }
-             }
          }
     });
 
@@ -447,12 +446,10 @@ async function chartMaker(station_number,station_name){
             }]
     },
             options:{
-             plugins:{
                  title:{
                      display: true,
-                     text: "Past 7 days"
+                     text: "Past 7 days bike availability"
                  }
-             }
          }
     
     });;

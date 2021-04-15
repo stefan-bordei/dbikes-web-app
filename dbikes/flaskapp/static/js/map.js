@@ -443,13 +443,13 @@ async function chartMaker(station_number,station_name){
         data:{
             labels:daytimes,
             datasets:[{
-                label:"Free bikes",
+                label:"Free Bikes in the past 24 hours",
                 data:dayAvailBike,
                 borderColor:"#4f8c96",
                backgroundColor:"#9bc3ca"
                 
             },{
-                label:"Free Stands",
+                label:"Free Stands in the past 24 hours",
                 data:dayAvailStands,
                 borderColor:"#006c7f",
                 backgroundColor:"#b3f4ff"
@@ -471,13 +471,13 @@ async function chartMaker(station_number,station_name){
         data:{
             labels:weekTimes,
             datasets:[{
-                label:"Free bikes",
+                label:"Free Bikes in the past week",
                 data:weekAvailBikes,
                 borderColor:"#4f8c96",
                backgroundColor:"#9bc3ca"
                 
             },{
-                label:"Free Stands",
+                label:"Free Stands in the past week",
                 data:weekAvailStands,
                 borderColor:"#006c7f",
                 backgroundColor:"#b3f4ff"

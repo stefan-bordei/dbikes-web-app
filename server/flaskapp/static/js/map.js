@@ -1,7 +1,7 @@
 
 var markers = [];
 var availableMarkers = [];
-
+window.onLoad = funtion() {window.location.reload();}
 let map;
 
 //This function removes the hidden attributes from the map infowindow and its contents

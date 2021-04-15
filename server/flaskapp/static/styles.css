@@ -25,10 +25,11 @@
     right:1%;
     background-color: rgba(255,255,255,.9);
     font-size: 3 vw 3vh;
-    font-family: Tahoma, sans-serif;
+    font-family: 'Julius Sans One', sans-serif;
     overflow: auto;
     border: 3px solid black;
     text-align: center;
+    color: rgba(0, 0, 0, .6);
 }
 
 #stationsTable{
@@ -41,10 +42,16 @@
     left: 1%;
     /* sets the font size to be relative to the container size/ prevents overflow */
     font-size: 3 vw 3vh;
-    font-family: Tahoma, sans-serif;
+    font-family: 'Julius Sans One', sans-serif;
     /* overflow auto allows the background colour to apply to the nested calander divs */
     overflow: auto;
     border: 3px solid black;
+}
+
+#dropdown{
+    color: rgba(0, 0, 0, .6);
+    text-align: center;
+    font-family: 'Julius Sans One', sans-serif;
 }
 
 /* sets the charts to be left and right at the bottom */
@@ -83,7 +90,7 @@ html, body {
 
 .title{
     padding-right:50%;
-    font-family: Georgia, serif;
+    font-family: 'Julius Sans One', sans-serif;
     font-size: 40px;
 }
 .nav ul {
@@ -102,7 +109,7 @@ html, body {
     color: rgba(0, 0, 0, .6);
     padding-left: 2%;
     padding-right: 2%;
-    font-family: Georgia, serif;
+    font-family: 'Julius Sans One', sans-serif;
     /*color: rgba(0, 0, 0, .6);*/
     text-decoration: none;
 }
@@ -177,6 +184,8 @@ html, body {
    
 }
 
+
+
 .pieChart {
     grid-column-start: 1;
     grid-column-end: 2;
@@ -185,6 +194,9 @@ html, body {
  
 }
 
+h2{
+    font-family: 'Julius Sans One', sans-serif;
+}
 
 .hero-image {
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.2)), url(/static/img/bner.jpg);
@@ -214,6 +226,7 @@ html, body {
   color: white;
     font-size: 40px;
     text-shadow: 1px 1px black;
+    font-family: 'Julius Sans One', sans-serif;
 }
 
 .hero-text button {
@@ -265,6 +278,8 @@ input[type=submit]:hover {
     background-color: #f2f2f2;
     padding: 20px;
     margin-top: 15px;
+    
+    
 }
 
 .column {
@@ -284,12 +299,23 @@ input[type=submit]:hover {
   text-align: center;
   background-color: #474e5d;
   color: white;
+    font-family: 'Julius Sans One', sans-serif;
+
 }
 
 .container {
   padding: 0 16px;
 }
 
+.container h2{
+    font-family: 'Julius Sans One', sans-serif;
+    font-size: 40px;
+}
+.container p{
+    font-family: 'Raleway', sans-serif;
+    font-size: 30px;
+    color: #000;
+}
 .container::after, .row::after {
   content: "";
   clear: both;
